@@ -32,3 +32,8 @@ O projeto foi desenvolvido como um estudo fullstack, simulando um ambiente de de
 
 ---
 
+## 🖌 Paleta de cores 
+1 - #ffc52c
+2 - #0a0310
+3 - #04BF8A
+4-#fb0c06
