@@ -30,8 +30,8 @@ const Navbar = () => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       viewport={{ amount: 0.5 }}
-      className={`fixed top-0 left-0 w-full h-16 flex justify-center items-center z-40 transition-colors duration-500 ${
-        scrolled ? "bg-white/95 backdrop-blur-md" : "bg-transparent"
+      className={` top-0 left-0 w-full h-16 flex justify-center items-center z-40 transition-colors duration-500 ${
+        scrolled ? "bg-white/95 backdrop-blur-md" : "bg-[#151515]"
       }`}
     >
       {/* Links Desktop */}
@@ -45,11 +45,11 @@ const Navbar = () => {
 
         {/* Links */}
         <div className="flex gap-8 items-center">
-          {["Home",  "Sistema", "Download"].map((item) => (
+          {["Home",  "UserSetup", "Download"].map((item) => (
             <Link
               key={item}
               to={`/${item === "Home" ? "" : item.toLowerCase()}`}
-              className="text-sm tracking-wider transition-colors text-[#22333b] hover:text-[#6cc7f5] font-zalando"
+              className="text-sm tracking-wider transition-colors text-[#ffbb00] hover:text-terciaria font-zalando"
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
@@ -63,7 +63,7 @@ const Navbar = () => {
       {/* Botão Mobile */}
       <button
         style={{ zIndex: 60 }}
-        className="absolute right-4 md:hidden text-[#22333b] text-4xl"
+        className="absolute right-4 md:hidden text-[#ffbb00] text-4xl"
         onClick={() => setOpen(!open)}
       >
         <i className={open ? "bx bx-x" : "bx bx-menu"}></i>
@@ -87,7 +87,7 @@ const Navbar = () => {
               <Link
                 key={item}
                 to={`/${item === "Home" ? "" : item.toLowerCase()}`}
-                className="hover:text-[#6cc7f5] font-zalando text-[#22333b] text-2xl mb-4"
+                className="hover:text-[#ffc52c] font-zalando text-[#0a0310] text-2xl mb-4"
                 onClick={() => {
                   setOpen(false);
                   window.scrollTo({ top: 0, behavior: "smooth" });
