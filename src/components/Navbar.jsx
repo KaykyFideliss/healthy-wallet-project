@@ -30,8 +30,8 @@ const Navbar = () => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       viewport={{ amount: 0.5 }}
-      className={` top-0 left-0 w-full h-16 flex justify-center items-center z-40 transition-colors duration-500 ${
-        scrolled ? "bg-white/95 backdrop-blur-md" : "bg-[#151515]"
+      className={`fixed top-0 left-0 w-full h-16 flex justify-center items-center z-40 transition-colors duration-500 ${
+        scrolled ? "bg-white/95 backdrop-blur-md" : "bg-transparent"
       }`}
     >
       {/* Links Desktop */}
@@ -81,7 +81,7 @@ const Navbar = () => {
               duration: 0.6,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center bg-terceiaria text-xl z-50"
+            className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center bg-terciaria text-xl z-50"
           >
             {["Home",  "UserSetup", "Download"].map((item) => (
               <Link

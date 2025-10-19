@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaTrash, FaArrowLeft } from "react-icons/fa";
 
+
 const MinhasContas = () => {
     const [tabelas, setTabelas] = useState([]);
     const [tabelaAtual, setTabelaAtual] = useState(null);
@@ -70,12 +71,12 @@ const MinhasContas = () => {
                 ...tabelaAtual,
                 contas: contas
             };
-            const novasTabelas = tabelas.map(t => 
+            const novasTabelas = tabelas.map(t =>
                 t.id === tabelaAtualizada.id ? tabelaAtualizada : t
             );
             setTabelas(novasTabelas);
         }
-        
+
         setTabelaAtual(null);
         setShowTable(false);
         setModoDeletar(false);
@@ -85,22 +86,22 @@ const MinhasContas = () => {
 
     const handleAddConta = () => {
         if (!novaConta.nome || !novaConta.vencimento || !novaConta.valor) return;
-        
+
         const novasContas = [...contas, novaConta];
         setContas(novasContas);
-        
+
         // Atualiza a tabela atual
         if (tabelaAtual) {
             const tabelaAtualizada = {
                 ...tabelaAtual,
                 contas: novasContas
             };
-            const novasTabelas = tabelas.map(t => 
+            const novasTabelas = tabelas.map(t =>
                 t.id === tabelaAtualizada.id ? tabelaAtualizada : t
             );
             setTabelas(novasTabelas);
         }
-        
+
         setNovaConta({ nome: "", vencimento: "", parcelas: "", valor: "" });
     };
 
@@ -119,19 +120,19 @@ const MinhasContas = () => {
         if (contaParaDeletar !== null) {
             const novasContas = contas.filter((_, i) => i !== contaParaDeletar);
             setContas(novasContas);
-            
+
             // Atualiza a tabela atual
             if (tabelaAtual) {
                 const tabelaAtualizada = {
                     ...tabelaAtual,
                     contas: novasContas
                 };
-                const novasTabelas = tabelas.map(t => 
+                const novasTabelas = tabelas.map(t =>
                     t.id === tabelaAtualizada.id ? tabelaAtualizada : t
                 );
                 setTabelas(novasTabelas);
             }
-            
+
             cancelarDelecao();
         }
     };
@@ -157,7 +158,7 @@ const MinhasContas = () => {
         return (
             <div className="  text-white flex flex-col items-center justify-center p-6">
                 <h1 className="text-3xl md:text-5xl  font-semibold  text-center font-zalando mb-8">MINHAS TABELAS</h1>
-                
+
                 {!criandoNovaTabela ? (
                     <div className="flex items-center justify-center">
                         <button
@@ -238,15 +239,15 @@ const MinhasContas = () => {
                     className="bg-secundaria text-white font-zalando py-2 px-4 rounded-xl hover:bg-green-700 transition mb-4 flex items-center gap-2"
                 >
                     <FaArrowLeft />
-                    Voltar para Minhas Tabelas
+                    Voltar
                 </button>
 
-<div className="flex justify-center items-center pt-10">
-    <h1 className="font-zalando text-lg">TABELA</h1>
-</div>
+                <div className="flex justify-center items-center pt-10">
+                    <h1 className="font-zalando text-base">TABELA</h1>
+                </div>
                 {/* Nome da Tabela Atual */}
                 {tabelaAtual && (
-                    
+
                     <h2 className="text-2xl font-zalando text-center mb-6 text-primaria">
                         {tabelaAtual.nome}
                     </h2>
@@ -265,13 +266,12 @@ const MinhasContas = () => {
                     <div
                         key={index}
                         onClick={() => handleClickLinha(index)}
-                        className={`font-zalando text-black flex justify-between lg:gap-4 px-1 md:px-16 lg:px-20 py-1 mt-2 rounded-xl mx-1 items-center cursor-pointer transition-all ${
-                            modoDeletar 
-                                ? contaParaDeletar === index 
-                                    ? 'bg-yellow-500 animate-pulse' 
+                        className={`font-zalando text-black flex justify-between lg:gap-4 px-1 md:px-16 lg:px-20 py-1 mt-2 rounded-xl mx-1 items-center cursor-pointer transition-all ${modoDeletar
+                                ? contaParaDeletar === index
+                                    ? 'bg-yellow-500 animate-pulse'
                                     : 'bg-primaria hover:bg-yellow-300'
                                 : 'bg-primaria'
-                        }`}
+                            }`}
                     >
                         <span className="text-xs w-16 md:w-24 md:text-lg lg:text-2xl break-keep">{conta.nome}</span>
                         <span className="w-28 text-[12px] md:w-36 md:text-[17px]">{conta.vencimento}</span>
@@ -288,9 +288,9 @@ const MinhasContas = () => {
                         value={novaConta.nome}
                         onChange={(e) => setNovaConta({ ...novaConta, nome: e.target.value })}
                         className="p-2 min-w-0 rounded-xl font-zalando text-black w-full md:w-1/4"
-                                   
+
                     />
-                    
+
                     <input
                         type="text"
                         placeholder="DD/MM/AAAA"
@@ -312,9 +312,9 @@ const MinhasContas = () => {
                                 const dataDigitada = new Date(ano, mes - 1, dia);
                                 const dataAtual = new Date();
                                 dataAtual.setHours(0, 0, 0, 0);
-                                const dataValida = 
-                                    dataDigitada.getDate() === dia && 
-                                    dataDigitada.getMonth() === mes - 1 && 
+                                const dataValida =
+                                    dataDigitada.getDate() === dia &&
+                                    dataDigitada.getMonth() === mes - 1 &&
                                     dataDigitada.getFullYear() === ano;
                                 if (!dataValida) {
                                     alert('Data inválida! Este dia não existe neste mês.');
@@ -330,7 +330,7 @@ const MinhasContas = () => {
                         className="p-2 rounded-xl text-black w-full md:w-1/4 font-zalando"
                         maxLength={10}
                     />
-                    
+
                     <input
                         type="number"
                         placeholder="Parcelas"
@@ -338,7 +338,7 @@ const MinhasContas = () => {
                         onChange={(e) => setNovaConta({ ...novaConta, parcelas: e.target.value })}
                         className="p-2 rounded-xl font-zalando text-black w-full md:w-1/4"
                     />
-                    
+
                     <input
                         type="number"
                         placeholder="Valor a pagar"
@@ -353,9 +353,8 @@ const MinhasContas = () => {
                     <button
                         onClick={handleAddConta}
                         disabled={modoDeletar}
-                        className={`${
-                            modoDeletar ? 'bg-gray-400' : 'bg-primaria hover:bg-yellow-300'
-                        } text-white p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
+                        className={`${modoDeletar ? 'bg-gray-400' : 'bg-primaria hover:bg-yellow-300'
+                            } text-white p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
                     >
                         <FaPlus className="mr-2" />
                         Adicionar
@@ -374,9 +373,8 @@ const MinhasContas = () => {
                             <button
                                 onClick={confirmarDelecao}
                                 disabled={contaParaDeletar === null}
-                                className={`${
-                                    contaParaDeletar === null ? 'bg-gray-400' : 'bg-vermelho hover:bg-red-500'
-                                } text-black p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
+                                className={`${contaParaDeletar === null ? 'bg-gray-400' : 'bg-vermelho hover:bg-red-500'
+                                    } text-black p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
                             >
                                 Confirmar Deleção
                             </button>
@@ -394,7 +392,7 @@ const MinhasContas = () => {
                 {modoDeletar && (
                     <div className="mt-4 p-3 bg-terciaria rounded-xl font-zalando text-center">
                         <p className="text-white font-zalando">
-                            {contaParaDeletar !== null 
+                            {contaParaDeletar !== null
                                 ? `Você tem certeza que quer apagar a conta "${contas[contaParaDeletar]?.nome}"?`
                                 : "Modo deletar ativado! Clique na linha que deseja apagar."
                             }
@@ -402,7 +400,10 @@ const MinhasContas = () => {
                     </div>
                 )}
             </div>
+  
         </div>
+
+        
     );
 };
 

@@ -13,19 +13,10 @@ module.exports = {
       colors: {
         "primaria": "#ffbb00", 
         "secundaria": "#03664E", // nome customizado
-        "terciaria": "#0a0310", // nome customizado
+        "terciaria": "#151515", // nome customizado
         "vermelho": "#fb0c06", // nome customizado
         
       },
-       animation: {
-        marquee: 'marquee 10s linear infinite',
-      },
-       keyframes: {
-        marquee: {
-          '0%': { transform: 'translateX(100%)' },
-          '100%': { transform: 'translateX(-100%)' },
-        }
-    },
   },
   plugins: [],
    }
