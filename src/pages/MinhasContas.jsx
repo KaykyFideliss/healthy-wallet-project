@@ -287,12 +287,8 @@ const MinhasContas = () => {
                         placeholder="Nome da conta"
                         value={novaConta.nome}
                         onChange={(e) => setNovaConta({ ...novaConta, nome: e.target.value })}
-                        className="p-2 rounded-xl text-black w-full md:w-1/4
-                                   placeholder:animate-marquee 
-                                   placeholder:whitespace-nowrap 
-                                   placeholder:inline-block
-                                   placeholder:font-zalando
-                                   min-w-0"
+                        className="p-2 min-w-0 rounded-xl font-zalando text-black w-full md:w-1/4"
+                                   
                     />
                     
                     <input
