@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaTrash } from "react-icons/fa";
 
 const MinhasContas = () => {
     const [showTable, setShowTable] = useState(false);
@@ -10,6 +10,8 @@ const MinhasContas = () => {
         parcelas: "",
         valor: ""
     });
+    const [modoDeletar, setModoDeletar] = useState(false);
+    const [contaParaDeletar, setContaParaDeletar] = useState(null);
 
     const handleCreateTable = () => {
         setShowTable(true);
@@ -21,16 +23,33 @@ const MinhasContas = () => {
         setNovaConta({ nome: "", vencimento: "", parcelas: "", valor: "" });
     };
 
-    const handleDelete = (index) => {
-        const novas = contas.filter((_, i) => i !== index);
-        setContas(novas);
+    const ativarModoDeletar = () => {
+        setModoDeletar(true);
+        setContaParaDeletar(null);
+    };
+
+    const handleClickLinha = (index) => {
+        if (modoDeletar) {
+            setContaParaDeletar(index);
+        }
+    };
+
+    const confirmarDelecao = () => {
+        if (contaParaDeletar !== null) {
+            const novasContas = contas.filter((_, i) => i !== contaParaDeletar);
+            setContas(novasContas);
+            cancelarDelecao();
+        }
+    };
+
+    const cancelarDelecao = () => {
+        setModoDeletar(false);
+        setContaParaDeletar(null);
     };
 
     return (
-
-        <div className="  min-h-screen text-white flex flex-col items-center ">
+        <div className="min-h-screen text-white flex flex-col items-center">
             {!showTable ? (
-
                 <div className="flex items-center justify-center min-h-screen">
                     <button
                         onClick={handleCreateTable}
@@ -39,74 +58,165 @@ const MinhasContas = () => {
                         CRIAR TABELA
                     </button>
                 </div>
-
-
-            )
-
-                : (
-                    <div className="w-full max-w-5xl mt-10">
-                        {/* Cabeçalho */}
-                        <div className="bg-primaria gap-1 font-zalando mx-1 text-black font-semibold rounded-xl flex justify-between pl-1 pr-1 py-3">
-                            <span className="  text-xs ">NOME</span>
-                            <span className="  text-xs ">VENCIMENTO</span>
-                            <span className=" text-xs ">PARCELAS</span>
-                            <span className="  text-xs ">VALOR</span>
-                        </div>
-
-                        {/* Linhas da tabela */}
-                        {contas.map((conta, index) => (
-                            <div
-                                key={index}
-                                className="bg-primaria font-zalando text-black flex justify-between px-1 py-1 mt-2 rounded-xl mx-1 items-center"
-                            >
-                                <span className="text-base ">{conta.nome}</span>
-                                <span className="text-base ">{conta.vencimento}</span>
-                                <span className="text-base ">{conta.parcelas}</span>
-                                <span className="text-base ">{conta.valor}</span>
-                               
-                            </div>
-                        ))}
-
-                        {/* Inputs para adicionar nova conta */}
-                        <div className="flex gap-3 mt-6">
-                            <input
-                                type="text"
-                                placeholder="Nome"
-                                value={novaConta.nome}
-                                onChange={(e) => setNovaConta({ ...novaConta, nome: e.target.value })}
-                                className="p-2 rounded-xl text-black w-1/4"
-                            />
-                            <input
-                                type="date"
-                                value={novaConta.vencimento}
-                                onChange={(e) => setNovaConta({ ...novaConta, vencimento: e.target.value })}
-                                className="p-2 rounded-xl text-black w-1/4"
-                            />
-                            <input
-                                type="number"
-                                placeholder="Parcelas"
-                                value={novaConta.parcelas}
-                                onChange={(e) => setNovaConta({ ...novaConta, parcelas: e.target.value })}
-                                className="p-2 rounded-xl text-black w-1/4"
-                            />
-                            <input
-                                type="number"
-                                placeholder="Valor"
-                                value={novaConta.valor}
-                                onChange={(e) => setNovaConta({ ...novaConta, valor: e.target.value })}
-                                className="p-2 rounded-xl text-black w-1/4"
-                            />
-                            
-
-                        </div>
-                        <button
-                                onClick={handleAddConta}
-                                className="bg-primaria mt-5 ml-1 w-1/5 text-black p-3 rounded-xl flex items-center justify-center hover:bg-yellow-300 transition"
-                            >
-                                <FaPlus />
-                            </button>
+            ) : (
+                <div className="w-full max-w-5xl lg:max-w-7xl p-3 mt-10">
+                    {/* Cabeçalho */}
+                    <div className="bg-primaria font-zalando mx-1 text-black font-semibold rounded-xl flex justify-between md:justify-around pl-1 pr-1 py-3">
+                        <span className="text-xs md:text-lg lg:text-3xl">NOME</span>
+                        <span className="text-xs pl-0 md:text-lg md:pl-14 lg:text-3xl">VENCIMENTO</span>
+                        <span className="text-xs md:text-lg lg:text-3xl">PARCELAS</span>
+                        <span className="text-xs md:text-lg lg:text-3xl">VALOR</span>
                     </div>
-                )}
+
+                    {/* Linhas da tabela */}
+                    {contas.map((conta, index) => (
+                        <div
+                            key={index}
+                            onClick={() => handleClickLinha(index)}
+                            className={`font-zalando text-black flex justify-between lg:gap-4 px-1 md:px-16 lg:px-20 py-1 mt-2 rounded-xl mx-1 items-center cursor-pointer transition-all ${
+                                modoDeletar 
+                                    ? contaParaDeletar === index 
+                                        ? 'bg-vermelho animate-pulse' 
+                                        : 'bg-primaria hover:bg-yellow-200'
+                                    : 'bg-primaria'
+                            }`}
+                        >
+                            <span className="text-xs w-16 md:w-24 md:text-lg lg:text-2xl break-keep">{conta.nome}</span>
+                            <span className="w-28 text-[12px] md:w-36 md:text-[17px]">{conta.vencimento}</span>
+                            <span className="text-base items-center flex justify-center w-16">{conta.parcelas}</span>
+                            <span className="text-xs flex justify-center w-16 md:text-lg md:pl-6">{conta.valor}</span>
+                        </div>
+                    ))}
+
+                    {/* Inputs para adicionar nova conta */}
+                    <div className="flex flex-col md:flex-row gap-3 mt-6">
+                        <input
+                            type="text"
+                            placeholder="Nome da conta"
+                            value={novaConta.nome}
+                            onChange={(e) => setNovaConta({ ...novaConta, nome: e.target.value })}
+                            className="p-2 rounded-xl text-black w-full md:w-1/4
+                                       placeholder:animate-marquee 
+                                       placeholder:whitespace-nowrap 
+                                       placeholder:inline-block
+                                       placeholder:font-zalando
+                                       min-w-0"
+                        />
+                        
+                        <input
+                            type="text"
+                            placeholder="DD/MM/AAAA"
+                            value={novaConta.vencimento}
+                            onChange={(e) => {
+                                let value = e.target.value.replace(/\D/g, '');
+                                if (value.length > 2) {
+                                    value = value.substring(0, 2) + '/' + value.substring(2);
+                                }
+                                if (value.length > 5) {
+                                    value = value.substring(0, 5) + '/' + value.substring(5, 9);
+                                }
+                                if (value.length === 10) {
+                                    const [dia, mes, ano] = value.split('/').map(Number);
+                                    if (dia < 1 || dia > 31 || mes < 1 || mes > 12 || ano < 2025) {
+                                        alert('Data inválida! Verifique dia, mês e ano.');
+                                        return;
+                                    }
+                                    const dataDigitada = new Date(ano, mes - 1, dia);
+                                    const dataAtual = new Date();
+                                    dataAtual.setHours(0, 0, 0, 0);
+                                    const dataValida = 
+                                        dataDigitada.getDate() === dia && 
+                                        dataDigitada.getMonth() === mes - 1 && 
+                                        dataDigitada.getFullYear() === ano;
+                                    if (!dataValida) {
+                                        alert('Data inválida! Este dia não existe neste mês.');
+                                        return;
+                                    }
+                                    if (dataDigitada < dataAtual) {
+                                        alert('Não é possível adicionar uma data passada!');
+                                        return;
+                                    }
+                                }
+                                setNovaConta({ ...novaConta, vencimento: value });
+                            }}
+                            className="p-2 rounded-xl text-black w-full md:w-1/4 font-zalando"
+                            maxLength={10}
+                        />
+                        
+                        <input
+                            type="number"
+                            placeholder="Parcelas"
+                            value={novaConta.parcelas}
+                            onChange={(e) => setNovaConta({ ...novaConta, parcelas: e.target.value })}
+                            className="p-2 rounded-xl font-zalando text-black w-full md:w-1/4"
+                        />
+                        
+                        <input
+                            type="number"
+                            placeholder="Valor"
+                            value={novaConta.valor}
+                            onChange={(e) => setNovaConta({ ...novaConta, valor: e.target.value })}
+                            className="p-2 rounded-xl font-zalando text-black w-full md:w-1/4"
+                        />
+                    </div>
+
+                    {/* Botões */}
+                    <div className="flex flex-col md:flex-row gap-3 mt-5">
+                        {/* Botão de adicionar */}
+                        <button
+                            onClick={handleAddConta}
+                            disabled={modoDeletar}
+                            className={`${
+                                modoDeletar ? 'bg-gray-400' : 'bg-primaria hover:bg-yellow-300'
+                            } text-black p-3 rounded-xl flex items-center justify-center transition flex-1`}
+                        >
+                            <FaPlus className="mr-2" />
+                            Adicionar
+                        </button>
+
+                        {/* Botão de deletar */}
+                        {!modoDeletar ? (
+                            <button
+                                onClick={ativarModoDeletar}
+                                className="bg-vermelho text-black p-3 rounded-xl flex items-center justify-center hover:bg-red-500 transition flex-1"
+                            >
+                                <FaTrash className="mr-2" />
+                                Deletar Linha
+                            </button>
+                        ) : (
+                            <div className="flex gap-3 flex-1">
+                                <button
+                                    onClick={confirmarDelecao}
+                                    disabled={contaParaDeletar === null}
+                                    className={`${
+                                        contaParaDeletar === null ? 'bg-gray-400' : 'bg-vermelho hover:bg-red-500'
+                                    } text-black p-3 rounded-xl flex items-center justify-center transition flex-1`}
+                                >
+                                    Confirmar Deleção
+                                </button>
+                                <button
+                                    onClick={cancelarDelecao}
+                                    className="bg-gray-500 text-white p-3 rounded-xl flex items-center justify-center hover:bg-gray-600 transition flex-1"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Mensagem de confirmação */}
+                    {modoDeletar && (
+                        <div className="mt-4 p-3 bg-terciaria rounded-xl font-zalando text-center">
+                            <p className="text-white font-zalando">
+                                {contaParaDeletar !== null 
+                                    ? `Você tem certeza que quer apagar a conta "${contas[contaParaDeletar]?.nome}"?`
+                                    : "Modo deletar ativado! Clique na linha que deseja apagar."
+                                }
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
