@@ -81,13 +81,13 @@ const Navbar = () => {
               duration: 0.6,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center bg-white text-xl z-50"
+            className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center bg-terceiaria text-xl z-50"
           >
-            {["Home", "Sistema", "Download"].map((item) => (
+            {["Home",  "UserSetup", "Download"].map((item) => (
               <Link
                 key={item}
                 to={`/${item === "Home" ? "" : item.toLowerCase()}`}
-                className="hover:text-[#ffc52c] font-zalando text-[#0a0310] text-2xl mb-4"
+                className="hover:text-[#ffc52c] font-zalando text-primaria text-2xl mb-4"
                 onClick={() => {
                   setOpen(false);
                   window.scrollTo({ top: 0, behavior: "smooth" });
