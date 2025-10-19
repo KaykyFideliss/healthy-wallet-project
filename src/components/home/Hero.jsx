@@ -1,6 +1,7 @@
 import React from "react";
 import { HeroGeometric } from "./Shade-Landing-Hero";
 
+
 const Hero = () => {
   return (
     <HeroGeometric 
