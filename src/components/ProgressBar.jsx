@@ -20,7 +20,7 @@ export default function ProgressBar({ currentStep }) {
           {/* Linha — só aparece entre os círculos */}
           {index < steps.length - 1 && (
             <div
-              className={`h-1 w-8 -m-1 z-0 md:w-52 lg:w-96 ${
+              className={`h-1 w-8 -m-1 z-0 md:w-52 lg:w-80 ${
                 currentStep > step ? "bg-[#FFCC28]" : "bg-white"
               }`}
             />

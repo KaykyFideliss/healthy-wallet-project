@@ -38,12 +38,7 @@ const UserSetup = () => {
       {/* barra de progresso */}
       <ProgressBar progress={progress} currentStep={step} />
 
-<div className="items-center flex justify-center mx-7 md:mx-20 lg:mx-40">
-      {/* Texto principal */}
-      <p className="text-gray-200 font-zalando text-xs text-center leading-relaxed pt-8">
-        Para começarmos a gerenciar e controlar seus gastos de forma eficiente, precisaremos coletar algumas informações importantes sobre você. Esses dados serão essenciais para entendermos melhor seus hábitos financeiros, organizar seu orçamento e ajudá-lo a tomar decisões mais conscientes e estratégicas em relação ao seu dinheiro. Com essas informações em mãos, poderemos criar um acompanhamento personalizado, oferecendo sugestões e insights que realmente façam a diferença no seu dia a dia financeiro.
-      </p>
-</div>
+
 
       
       {/* conteúdo dinâmico */}

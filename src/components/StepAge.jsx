@@ -11,24 +11,24 @@ export default function StepAge({ onNext, onPrev, data }) {
 
   return (
     <div className="flex flex-col items-center">
-      <label className="mb-2 text-gray-300 text-lg">Idade</label>
+      <label className="mb-2 text-primaria font-zalando text-lg">Idade</label>
       <input
         type="number"
         value={age}
         onChange={(e) => setAge(e.target.value)}
-        className="bg-[#FFCC28] text-black px-4 py-3 rounded-xl w-80 mb-6 font-semibold text-center"
+              className=" text-black px-4 py-3 rounded-xl font-zalando  w-80 mb-6 font-semibold text-center"
         placeholder="Digite sua idade"
       />
       <div className="flex gap-4">
         <button
           onClick={onPrev}
-          className="bg-gray-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-600 transition"
+          className="bg-gray-500 font-zalando text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-600 transition"
         >
           Voltar
         </button>
         <button
           onClick={handleSubmit}
-          className="bg-[#FFCC28] text-black px-6 py-3 rounded-xl font-semibold hover:bg-yellow-400 transition"
+          className="bg-[#FFCC28] text-black font-zalando px-6 py-3 rounded-xl font-semibold hover:bg-yellow-400 transition"
         >
           Prosseguir
         </button>
