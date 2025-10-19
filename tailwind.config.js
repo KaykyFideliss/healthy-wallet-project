@@ -13,7 +13,7 @@ module.exports = {
       colors: {
         "primaria": "#ffbb00", 
         "secundaria": "#03664E", // nome customizado
-        "terciaria": "#151515", // nome customizado
+        "terciaria": "#030303", // nome customizado
         "vermelho": "#fb0c06", // nome customizado
         
       },
