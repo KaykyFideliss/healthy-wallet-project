@@ -1,5 +1,5 @@
 import React from "react";
-import { HeroGeometric } from "@/Shade-landing-hero";
+import { HeroGeometric } from "./Shade-Landing-Hero";
 
 const Hero = () => {
   return (
