@@ -30,12 +30,12 @@ const Navbar = () => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       viewport={{ amount: 0.5 }}
-      className={`fixed top-0 left-0 w-full h-16 flex justify-center items-center z-40 transition-colors duration-500 ${
-        scrolled ? "bg-white/95 backdrop-blur-md" : "bg-transparent"
+      className={`fixed top-0 left-0 w-full h-16 flex justify-center items-center z-40 transition-colors duration-500  ${
+        scrolled ? "bg-terciaria backdrop-blur-md" : "bg-transparent"
       }`}
     >
       {/* Links Desktop */}
-      <div className="hidden md:flex justify-between items-center w-full px-8 pt-4">
+      <div className="hidden h-16 md:flex justify-between items-center w-full px-8 text-center">
         {/* Logo */}
         <div>
           <Link to="/">
@@ -49,7 +49,7 @@ const Navbar = () => {
             <Link
               key={item}
               to={`/${item === "Home" ? "" : item.toLowerCase()}`}
-              className="text-sm tracking-wider transition-colors text-[#ffbb00] hover:text-terciaria font-zalando"
+              className="text-sm tracking-wider transition-colors text-[#ffbb00] hover:text-secundaria font-zalando"
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}

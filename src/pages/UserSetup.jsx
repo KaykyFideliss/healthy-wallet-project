@@ -31,7 +31,7 @@ const UserSetup = () => {
   const progress = ((step -1) / 3) *100;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen  text-white p-6">
+    <section className="flex flex-col items-center justify-center min-h-screen  text-white p-6 mt-20 ">
       
 
       <p className="font-zalando text-sm pt-3 text-primaria">Etapas</p>
@@ -56,7 +56,7 @@ const UserSetup = () => {
           />
         )}
       </div>
-    </div>
+    </section>
   );
 };
 

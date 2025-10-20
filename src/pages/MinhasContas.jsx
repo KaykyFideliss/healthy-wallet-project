@@ -156,7 +156,7 @@ const MinhasContas = () => {
     // Tela de listagem de tabelas
     if (!showTable) {
         return (
-            <div className="  text-white flex flex-col items-center justify-center p-6">
+            <div className="  text-white flex flex-col items-center justify-center p-6  mt-20">
                 <h1 className="text-3xl md:text-5xl  font-semibold  text-center font-zalando mb-8">MINHAS TABELAS</h1>
 
                 {!criandoNovaTabela ? (
