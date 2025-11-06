@@ -11,7 +11,7 @@ const WhyToUse = () => {
       <div className='w-full max-w-7xl px-6 py-8'>
         
         <div className='text-center mb-12'>
-          <h1 className="bg-clip-text text-3xl font-bold sm:text-4xl md:text-6xl text-white font-zalando [text-shadow:0_0_10px_rgba(255,255,255,0.6)]">
+          <h1 className="bg-clip-text text-3xl font-bold sm:text-4xl md:text-6xl text-white font-zalando ">
             Por que usar o Healthy Wallet ?
           </h1>
         </div>
