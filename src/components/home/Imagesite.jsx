@@ -4,7 +4,7 @@ import { MdScreenshotMonitor, MdOutlineInsights } from "react-icons/md";
 
 const Imagesite = () => {
   return (
-   <section className="min-h-screen w-full flex flex-col-reverse lg:flex-row items-center justify-center gap-4 px-6 py-10 mt-8 rounded-lg shadow-md mx-auto ">
+   <section className="min-h-screen w-full flex flex-col-reverse lg:flex-row items-center justify-center gap-4  px-6 py-10 mt-8 rounded-lg shadow-md mx-auto ">
 
       {/* IMAGEM ESQUERDA (no celular fica embaixo) */}
       <div className=" w-full lg:w-1/2 items-center flex justify-center ">
@@ -16,14 +16,16 @@ const Imagesite = () => {
       </div>
 
       {/* TEXTO À DIREITA */}
-      <div className="flex flex-col justify-left w-full lg:w-1/2 max-w-lg  gap-10 text-center lg:text-left">
+      <div className="flex flex-col md:flex-col justify-left w-full lg:w-1/2 max-w-lg lg:mr-52 gap-2 md:gap-1 text-center lg:text-left ">
         
+        <div className='flex items-end justify-center lg:justify-start mb-2'>
         {/* Título pequeno */}
-        <div className="flex items-center justify-center lg:justify-start border-primaria border-2 rounded-3xl p-2 w-fit mx-auto lg:mx-0">
+        <div className="flex items-center  justify-center lg:justify-start h-1 border-primaria border-2 rounded-3xl p-2 w-fit mx-aut lg:mx-0">
           <div className="pr-3">
             <p className="bg-secundaria animate-pulse rounded-full w-2 h-2"></p>
           </div>
           <p className="text-[10px] text-white font-zalando uppercase">Por que nos escolher?</p>
+        </div>
         </div>
 
         {/* Título principal */}
