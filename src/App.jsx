@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Navbar from './components/Navbar';
 import UserSetup from "./pages/UserSetup";
 import MinhasContas from './pages/MinhasContas';
+import Login from './pages/login';
 
 function App() {
   return (
@@ -15,6 +16,8 @@ function App() {
         <Route path='/UserSetup' element={<UserSetup />} />
 
       <Route path='/MinhasContas' element={<MinhasContas />} />
+
+      <Route path='/Login' element={<Login />} />
 
       </Routes>
     </>

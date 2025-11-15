@@ -39,13 +39,13 @@ const Navbar = () => {
         {/* Logo */}
         <div>
           <Link to="/">
-            <img src="/img/logo.png" alt="Foto-logo" className="pt-2 w-20 h-20" />
+            <img src="img/Healthy-logo.png" alt="Foto-logo" className="pt-2 w-24 h-24" />
           </Link>
         </div>
 
         {/* Links */}
         <div className="flex gap-8 items-center">
-          {["Home",  "UserSetup", "Download"].map((item) => (
+          {["Home",  "UserSetup", "Download", "Login"].map((item) => (
             <Link
               key={item}
               to={`/${item === "Home" ? "" : item.toLowerCase()}`}
