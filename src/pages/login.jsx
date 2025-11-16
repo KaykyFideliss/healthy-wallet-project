@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MdEmail } from "react-icons/md";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-const LoginForm = () => {
+const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
-    <div className="h-screen w-screen flex flex-col md:flex-row items-center justify-center">
+    <div className="h-screen w-screen overflow-x-hidden flex flex-col md:flex-row items-center justify-center">
 
       {/* LADO ESQUERDO */}
       <div className="hidden md:flex md:w-1/2 ml-14 h-[800px] md:h-[600px] bg-gradient-to-tr rounded-xl bg-azul-style items-center justify-center p-6 relative">
@@ -18,43 +20,124 @@ const LoginForm = () => {
         <div className="z-10 text-center px-4"></div>
       </div>
 
-      {/* LADO DIREITO (FORM FRONT-END) */}
-      <div className=" flex w-full md:w-1/2 items-center justify-center p-6">
+      {/* LADO DIREITO */}
+      <div className="flex w-full md:w-1/2 items-center justify-center p-6">
         <div className="w-full max-w-sm">
-          <img className="w-60 h-30 mx-auto mb-4" src="img/Healthy-logo.png" alt="Logo" />
 
-          <h2 className="text-3xl text-primaria font-zalando font-semibold mb-6 text-center">
-            Login
+          <div className="-m-10">
+            <img className="w-60 h-60 mx-auto" src="img/Healthy-logo.png" alt="Logo" />
+          </div>
+
+          <h2 className="text-3xl text-white font-zalando font-semibold mb-5 text-center">
+            LOGIN
           </h2>
 
-          {/* FORMULÁRIO SEM BACK-END */}
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={(e) => e.preventDefault()}>
 
             {/* EMAIL */}
-            <div className="relative">
+            <div className="relative mb-6">
+
+              {/* BORDA DO INPUT (efeito notch) */}
+              <div className="
+    absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none
+  ">
+              </div>
+
+              {/* NOTCH (quebra da borda atrás da label) */}
+              <div className="
+    absolute -top-3 left-3 px-1 bg-black
+    transition-all duration-300
+    peer-placeholder-shown:bg-transparent
+    peer-placeholder-shown:px-0
+    peer-placeholder-shown:left-3
+  ">
+                <span
+                  className="
+        text-yellow-400 font-zalando text-xs
+        transition-all duration-300
+        peer-placeholder-shown:text-sm
+        peer-placeholder-shown:opacity-0
+        peer-focus:opacity-100
+      "
+                >
+                  EMAIL
+                </span>
+              </div>
+
+              {/* INPUT */}
               <input
                 required
                 type="email"
                 placeholder=" "
-                className=" bg-black text-primaria w-full border border-yellow-300 rounded-lg px-3 py-3 focus:outline-none focus:ring-2  peer"
+                className="
+      peer bg-black text-primaria w-full rounded-lg px-3 py-3
+      focus:outline-none
+    "
               />
 
-              <label className="text-white">
-                EMAIL
-              </label>
-
-              <MdEmail className="absolute text-lg right-3 top-1/2 -translate-y-1/2 text-azul-style" />
+              {/* ÍCONE */}
+              <MdEmail className="absolute right-3 top-1/2 -translate-y-1/2 text-yellow-400" />
             </div>
 
+
+           {/* SENHA */}
+<div className="relative mb-6">
+
+  {/* BORDA DO INPUT (efeito notch) */}
+  <div className="
+    absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none
+  "></div>
+
+  {/* NOTCH */}
+  <div className="
+    absolute -top-3 left-3 px-1 bg-black
+    transition-all duration-300
+    peer-placeholder-shown:bg-transparent
+    peer-placeholder-shown:px-0
+    peer-placeholder-shown:left-3
+  ">
+    <span
+      className="
+        text-yellow-400 font-zalando text-xs
+        transition-all duration-300
+        peer-placeholder-shown:text-sm
+        peer-placeholder-shown:opacity-0
+        peer-focus:opacity-100
+      "
+    >
+      SENHA
+    </span>
+  </div>
+
+  {/* INPUT */}
+  <input
+    required
+    type={showPassword ? "text" : "password"}
+    placeholder=" "
+    className="peer bg-black text-primaria w-full rounded-lg px-3 py-3 focus:outline-none"
+  />
+
+  {/* ÍCONE OLHO */}
+  <div
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-yellow-400"
+  >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+  </div>
+</div>
+
+
+            {/* BOTÃO */}
             <button
               type="submit"
-              className="w-full bg-azul-style hover:bg-blue-600 font-zalando text-white py-2 rounded-lg transition-colors">
+              className="w-full bg-secundaria hover:bg-primaria text-primaria hover:text-secundaria font-zalando py-2 rounded-lg transition-colors"
+            >
               Entrar
             </button>
 
-            <div className="text-center font-zalando text-gray-600 text-sm mt-2">
-              Não tem conta?{" "}
-              <a href="/cadastro" className="text-azul-style font-medium hover:underline">
+            <div className="text-center font-zalando text-secundaria text-sm mt-2">
+              Não tem conta ?{" "}
+              <a href="/cadastro" className="text-primaria font-zalando font-semibold hover:underline">
                 Cadastre-se
               </a>
             </div>
@@ -66,4 +149,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default Login;
