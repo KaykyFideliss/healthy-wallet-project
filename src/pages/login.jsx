@@ -19,11 +19,11 @@ const LoginForm = () => {
       </div>
 
       {/* LADO DIREITO (FORM FRONT-END) */}
-      <div className="flex w-full md:w-1/2 items-center justify-center p-6">
+      <div className=" flex w-full md:w-1/2 items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <img className="w-60 h-30 mx-auto mb-4" src="img/Healthy-logo.png" alt="Logo" />
 
-          <h2 className="text-3xl text-azul-style font-zalando font-semibold mb-6 text-center">
+          <h2 className="text-3xl text-primaria font-zalando font-semibold mb-6 text-center">
             Login
           </h2>
 
@@ -36,35 +36,14 @@ const LoginForm = () => {
                 required
                 type="email"
                 placeholder=" "
-                className="w-full border text-azul-style font-zalando border-gray-300 rounded-lg px-3 py-3 focus:outline-none focus:ring-2 focus:ring-azul-style peer"
+                className=" bg-black text-primaria w-full border border-yellow-300 rounded-lg px-3 py-3 focus:outline-none focus:ring-2  peer"
               />
 
-              <label className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-all duration-200 cursor-text
-                peer-focus:-top-2 peer-focus:bg-white peer-focus:px-1 peer-focus:text-azul-style peer-focus:text-xs
-                peer-[not(:placeholder-shown)]:-top-2 peer-[not(:placeholder-shown)]:bg-white peer-[not(:placeholder-shown)]:px-1 peer-[not(:placeholder-shown)]:text-azul-style peer-[not(:placeholder-shown)]:text-xs">
+              <label className="text-white">
                 EMAIL
               </label>
 
               <MdEmail className="absolute text-lg right-3 top-1/2 -translate-y-1/2 text-azul-style" />
-            </div>
-
-            {/* SENHA */}
-            <div className="relative">
-              <input
-                required
-                type="password"
-                placeholder=" "
-                className="w-full border text-azul-style font-zalando border-gray-300 rounded-lg px-3 py-3 focus:outline-none focus:ring-2 focus:ring-azul-style peer"
-              />
-
-              <label className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm transition-all duration-200 cursor-text
-                peer-focus:-top-2 peer-focus:bg-white peer-focus:px-1 peer-focus:text-azul-style peer-focus:text-xs
-                peer-[not(:placeholder-shown)]:-top-2 peer-[not(:placeholder-shown)]:bg-white peer-[not(:placeholder-shown)]:px-1 peer-[not(:placeholder-shown)]:text-azul-style peer-[not(:placeholder-shown)]:text-xs">
-                SENHA
-              </label>
-
-              {/* Ícone sem funcionalidade, apenas visual */}
-              <FaEye className="absolute text-lg right-3 top-1/2 -translate-y-1/2 text-azul-style cursor-default" />
             </div>
 
             <button
