@@ -4,6 +4,8 @@ import Navbar from './components/Navbar';
 import UserSetup from "./pages/UserSetup";
 import MinhasContas from './pages/MinhasContas';
 import Login from './pages/login';
+import Cadastro from './pages/cadastro';
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
   return (
@@ -19,7 +21,12 @@ function App() {
 
       <Route path='/Login' element={<Login />} />
 
+      <Route path='/Cadastro' element={<Cadastro />} />
       </Routes>
+
+        <GoogleOAuthProvider clientId="16111024494-4ce3in6cah7hic3eoma1ml12evv6h2pe.apps.googleusercontent.com">
+      {/* Seu app inteiro */}
+    </GoogleOAuthProvider>
     </>
   );
 }

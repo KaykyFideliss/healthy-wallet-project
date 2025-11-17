@@ -1,5 +1,5 @@
 export default function ProgressBar({ currentStep }) {
-  const steps = [1, 2, 3, 4]; // Número total de etapas
+  const steps = [1, 2, 3]; // Número total de etapas
 
   return (
     <div className="flex items-center justify-center gap-1 mb-1 pt-2">

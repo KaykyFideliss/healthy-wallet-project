@@ -1,9 +1,43 @@
 import React, { useState } from 'react';
 import { MdEmail } from "react-icons/md";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash,FaGoogle  } from "react-icons/fa";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { useGoogleLogin } from "@react-oauth/google";
+
+
+
+
 
 const Login = () => {
+  const loginGoogle = useGoogleLogin({
+  onSuccess: async (tokenResponse) => {
+    const userInfo = await axios.get(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        headers: {
+          Authorization: `Bearer ${tokenResponse.access_token}`,
+        },
+      }
+    );
+
+    console.log("Usuário Google:", userInfo.data);
+  },
+  onError: () => console.log("Erro no login Google"),
+});
+
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleGoogleLogin = (credentialResponse) => {
+    const token = credentialResponse.credential;
+    const user = jwtDecode(token);
+
+    console.log("Usuário Google:", user);
+
+    // Aqui você envia para o backend
+    // fetch("http://localhost:3000/api/auth/google", ...)
+  };
 
   return (
     <div className="h-screen w-screen overflow-x-hidden flex flex-col md:flex-row items-center justify-center">
@@ -37,103 +71,108 @@ const Login = () => {
             {/* EMAIL */}
             <div className="relative mb-6">
 
-              {/* BORDA DO INPUT (efeito notch) */}
-              <div className="
-    absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none
-  ">
-              </div>
+              <div className="absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none"></div>
 
-              {/* NOTCH (quebra da borda atrás da label) */}
               <div className="
-    absolute -top-3 left-3 px-1 bg-black
-    transition-all duration-300
-    peer-placeholder-shown:bg-transparent
-    peer-placeholder-shown:px-0
-    peer-placeholder-shown:left-3
-  ">
+                absolute -top-3 left-3 px-1 bg-black
+                transition-all duration-300
+                peer-placeholder-shown:bg-transparent
+                peer-placeholder-shown:px-0
+                peer-placeholder-shown:left-3
+              ">
                 <span
                   className="
-        text-yellow-400 font-zalando text-xs
-        transition-all duration-300
-        peer-placeholder-shown:text-sm
-        peer-placeholder-shown:opacity-0
-        peer-focus:opacity-100
-      "
+                    text-yellow-400 font-zalando text-xs
+                    transition-all duration-300
+                    peer-placeholder-shown:text-sm
+                    peer-placeholder-shown:opacity-0
+                    peer-focus:opacity-100
+                  "
                 >
                   EMAIL
                 </span>
               </div>
 
-              {/* INPUT */}
               <input
                 required
                 type="email"
                 placeholder=" "
-                className="
-      peer bg-black text-primaria w-full rounded-lg px-3 py-3
-      focus:outline-none
-    "
+                className="peer bg-black text-primaria w-full rounded-lg px-3 py-3 focus:outline-none"
               />
 
-              {/* ÍCONE */}
               <MdEmail className="absolute right-3 top-1/2 -translate-y-1/2 text-yellow-400" />
             </div>
 
 
-           {/* SENHA */}
-<div className="relative mb-6">
+            {/* SENHA */}
+            <div className="relative mb-2">
 
-  {/* BORDA DO INPUT (efeito notch) */}
-  <div className="
-    absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none
-  "></div>
+              <div className="absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none"></div>
 
-  {/* NOTCH */}
-  <div className="
-    absolute -top-3 left-3 px-1 bg-black
-    transition-all duration-300
-    peer-placeholder-shown:bg-transparent
-    peer-placeholder-shown:px-0
-    peer-placeholder-shown:left-3
-  ">
-    <span
-      className="
-        text-yellow-400 font-zalando text-xs
-        transition-all duration-300
-        peer-placeholder-shown:text-sm
-        peer-placeholder-shown:opacity-0
-        peer-focus:opacity-100
-      "
-    >
-      SENHA
-    </span>
-  </div>
+              <div className="
+                absolute -top-3 left-3 px-1 bg-black
+                transition-all duration-300
+                peer-placeholder-shown:bg-transparent
+                peer-placeholder-shown:px-0
+                peer-placeholder-shown:left-3
+              ">
+                <span
+                  className="
+                    text-yellow-400 font-zalando text-xs
+                    transition-all duration-300
+                    peer-placeholder-shown:text-sm
+                    peer-placeholder-shown:opacity-0
+                    peer-focus:opacity-100
+                  "
+                >
+                  SENHA
+                </span>
+              </div>
 
-  {/* INPUT */}
-  <input
-    required
-    type={showPassword ? "text" : "password"}
-    placeholder=" "
-    className="peer bg-black text-primaria w-full rounded-lg px-3 py-3 focus:outline-none"
-  />
+              <input
+                required
+                type={showPassword ? "text" : "password"}
+                placeholder=" "
+                className="peer bg-black text-primaria w-full rounded-lg px-3 py-3 focus:outline-none"
+              />
 
-  {/* ÍCONE OLHO */}
-  <div
-    onClick={() => setShowPassword(!showPassword)}
-    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-yellow-400"
-  >
-    {showPassword ? <FaEyeSlash /> : <FaEye />}
-  </div>
-</div>
+              <div
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-yellow-400"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </div>
 
+            </div>
 
-            {/* BOTÃO */}
+            <div className='mb-3'>
+              <a href="/" className='font-zalando text-primaria hover:underline text-sm flex justify-end'>
+                esqueceu a senha ?
+              </a>
+            </div>
+
+            {/* BOTÃO LOGIN */}
             <button
               type="submit"
               className="w-full bg-secundaria hover:bg-primaria text-primaria hover:text-secundaria font-zalando py-2 rounded-lg transition-colors"
             >
               Entrar
             </button>
+
+<div className='mt-3 rounded-xl bg-[#1d1c1d] h-[1.9px]' ></div>
+
+         {/* BOTÃO GOOGLE PERSONALIZADO */}
+          <div className="mt-4">
+            <button
+            type='button'
+              onClick={loginGoogle}
+              className="w-full bg-secundaria hover:bg-primaria text-primaria hover:text-secundaria  py-3 px-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-300 font-zalando font-semibold shadow-md hover:shadow-lg active:scale-95"
+            >
+              <FaGoogle  className="text-2xl" />
+              <span className="text-sm md:text-base">Continuar com Google</span>
+            </button>
+          </div>
+
 
             <div className="text-center font-zalando text-secundaria text-sm mt-2">
               Não tem conta ?{" "}
@@ -145,6 +184,7 @@ const Login = () => {
           </form>
         </div>
       </div>
+
     </div>
   );
 };
