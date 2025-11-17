@@ -169,7 +169,7 @@ const Login = () => {
               className="w-full bg-secundaria hover:bg-primaria text-primaria hover:text-secundaria  py-3 px-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-300 font-zalando font-semibold shadow-md hover:shadow-lg active:scale-95"
             >
               <FaGoogle  className="text-2xl" />
-              <span className="text-sm md:text-base">Continuar com Google</span>
+              <span className="text-sm md:text-base">Continuar  com Google</span>
             </button>
           </div>
 
