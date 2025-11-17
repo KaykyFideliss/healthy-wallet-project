@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { MdEmail } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaUserAlt, FaPhone } from "react-icons/fa";
 
-const Cadastro = () => {
+const cadastro = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
@@ -241,4 +241,4 @@ const PasswordField = ({
   </div>
 );
 
-export default Cadastro;
+export default cadastro;
