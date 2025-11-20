@@ -45,7 +45,7 @@ const Navbar = () => {
 
         {/* Links */}
         <div className="flex gap-8 items-center">
-          {["Home",  "UserSetup", "Download", "Login"].map((item) => (
+          {["Home", "Download", "Login"].map((item) => (
             <Link
               key={item}
               to={`/${item === "Home" ? "" : item.toLowerCase()}`}
@@ -83,7 +83,7 @@ const Navbar = () => {
             }}
             className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center bg-terciaria text-xl z-50"
           >
-            {["Home",  "UserSetup", "Download","Login"].map((item) => (
+            {["Home", "Download","Login"].map((item) => (
               <Link
                 key={item}
                 to={`/${item === "Home" ? "" : item.toLowerCase()}`}

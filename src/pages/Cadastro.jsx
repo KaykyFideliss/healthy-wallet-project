@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { MdEmail } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaUserAlt, FaPhone } from "react-icons/fa";
+import { supabase } from "../lib/supabaseClient";
+import { useNavigate } from "react-router-dom";
 
 const cadastro = () => {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
@@ -16,13 +20,11 @@ const cadastro = () => {
 
   const [erro, setErro] = useState("");
 
-  // Atualiza campos
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErro(""); // limpa erro ao digitar
+    setErro("");
   };
 
-  // Regex de validação
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const senhaRegex =
     /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
@@ -47,7 +49,7 @@ const cadastro = () => {
     return "";
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const erroValidacao = validar();
 
@@ -56,8 +58,45 @@ const cadastro = () => {
       return;
     }
 
-    alert("Cadastro válido! Pronto para enviar ao backend.");
-    console.log("Dados:", form);
+    try {
+      // 1️⃣ Criar usuário no Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.senha,
+      });
+
+      if (error) {
+        setErro(error.message);
+        return;
+      }
+
+      const user = data.user;
+
+      // 2️⃣ Salvar dados extras na tabela profiles (INCLUÍDO EMAIL)
+      const { error: erroProfile } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          nome: form.nome,
+          sobrenome: form.sobrenome,
+          telefone: form.telefone,
+          email: form.email, // ← ADICIONADO!
+        });
+
+      if (erroProfile) {
+        setErro(erroProfile.message);
+        return;
+      }
+
+      alert("Cadastro realizado com sucesso! Verifique seu email.");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 500);
+
+    } catch (err) {
+      setErro("Erro inesperado ao cadastrar.");
+    }
   };
 
   return (
@@ -132,7 +171,6 @@ const cadastro = () => {
               name="telefone"
               value={form.telefone}
               onChange={(e) => {
-                // permite apenas números
                 if (/^\d*$/.test(e.target.value)) {
                   handleChange(e);
                 }
@@ -186,7 +224,6 @@ const cadastro = () => {
   );
 };
 
-// COMPONENTE GERAL DE INPUT
 const InputField = ({ label, name, value, onChange, Icon, type, maxLength }) => (
   <div className="relative mb-6">
     <div className="absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none"></div>
@@ -207,7 +244,6 @@ const InputField = ({ label, name, value, onChange, Icon, type, maxLength }) => 
   </div>
 );
 
-// COMPONENTE DE SENHA
 const PasswordField = ({
   label,
   name,

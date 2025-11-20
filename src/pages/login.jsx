@@ -1,43 +1,93 @@
 import React, { useState } from 'react';
 import { MdEmail } from "react-icons/md";
-import { FaEye, FaEyeSlash,FaGoogle  } from "react-icons/fa";
-import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
-
-
-
-
+import { supabase } from "../lib/supabaseClient";
+import axios from "axios";
 
 const Login = () => {
-  const loginGoogle = useGoogleLogin({
-  onSuccess: async (tokenResponse) => {
-    const userInfo = await axios.get(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${tokenResponse.access_token}`,
-        },
-      }
-    );
-
-    console.log("Usuário Google:", userInfo.data);
-  },
-  onError: () => console.log("Erro no login Google"),
-});
-
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleGoogleLogin = (credentialResponse) => {
-    const token = credentialResponse.credential;
-    const user = jwtDecode(token);
+  const [form, setForm] = useState({
+    email: "",
+    senha: "",
+  });
 
-    console.log("Usuário Google:", user);
+  const [erro, setErro] = useState("");
 
-    // Aqui você envia para o backend
-    // fetch("http://localhost:3000/api/auth/google", ...)
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErro("");
   };
+
+  // ---------------------------
+  // 📌 LOGIN COM EMAIL + SENHA
+  // ---------------------------
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErro("");
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.senha,
+    });
+
+    if (error) {
+      setErro("Email ou senha incorretos.");
+      return;
+    }
+
+    const userId = data.user.id;
+
+    // Verifica se o user já tem setup feito
+    const { data: profile } = await supabase
+      .from("users")
+      .select("salario, idade")
+      .eq("id", userId)
+      .single();
+
+    if (!profile || profile.salario === null || profile.idade === null) {
+      window.location.href = "/UserSetup";
+      return;
+    }
+
+    window.location.href = "/MinhasContas";
+  };
+
+  // --------------------------------------------------
+  // 📌 LOGIN COM GOOGLE (via Supabase OAuth)
+  // --------------------------------------------------
+  const loginGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const { access_token } = tokenResponse;
+
+      // pega dados básicos para exibir (não é obrigatório)
+      const googleUser = await axios.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      );
+
+      const email = googleUser.data.email;
+
+      // Login OAuth no Supabase
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+      });
+
+      if (error) {
+        console.log("Erro Supabase OAuth", error);
+        setErro("Erro no login com Google");
+        return;
+      }
+
+      // Supabase vai redirecionar sozinho para a URL configurada
+    },
+    onError: () => setErro("Erro ao tentar login com Google"),
+  });
 
   return (
     <div className="h-screen w-screen overflow-x-hidden flex flex-col md:flex-row items-center justify-center">
@@ -66,36 +116,25 @@ const Login = () => {
             LOGIN
           </h2>
 
-          <form onSubmit={(e) => e.preventDefault()}>
+          {erro && (
+            <p className="text-red-400 text-sm text-center mb-3">{erro}</p>
+          )}
+
+          <form onSubmit={handleLogin}>
 
             {/* EMAIL */}
             <div className="relative mb-6">
-
               <div className="absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none"></div>
-
-              <div className="
-                absolute -top-3 left-3 px-1 bg-black
-                transition-all duration-300
-                peer-placeholder-shown:bg-transparent
-                peer-placeholder-shown:px-0
-                peer-placeholder-shown:left-3
-              ">
-                <span
-                  className="
-                    text-yellow-400 font-zalando text-xs
-                    transition-all duration-300
-                    peer-placeholder-shown:text-sm
-                    peer-placeholder-shown:opacity-0
-                    peer-focus:opacity-100
-                  "
-                >
-                  EMAIL
-                </span>
+              <div className="absolute -top-3 left-3 px-1 bg-black">
+                <span className="text-yellow-400 font-zalando text-xs">EMAIL</span>
               </div>
 
               <input
                 required
                 type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
                 placeholder=" "
                 className="peer bg-black text-primaria w-full rounded-lg px-3 py-3 focus:outline-none"
               />
@@ -103,35 +142,21 @@ const Login = () => {
               <MdEmail className="absolute right-3 top-1/2 -translate-y-1/2 text-yellow-400" />
             </div>
 
-
             {/* SENHA */}
             <div className="relative mb-2">
 
               <div className="absolute inset-0 rounded-lg border-2 border-yellow-400 pointer-events-none"></div>
 
-              <div className="
-                absolute -top-3 left-3 px-1 bg-black
-                transition-all duration-300
-                peer-placeholder-shown:bg-transparent
-                peer-placeholder-shown:px-0
-                peer-placeholder-shown:left-3
-              ">
-                <span
-                  className="
-                    text-yellow-400 font-zalando text-xs
-                    transition-all duration-300
-                    peer-placeholder-shown:text-sm
-                    peer-placeholder-shown:opacity-0
-                    peer-focus:opacity-100
-                  "
-                >
-                  SENHA
-                </span>
+              <div className="absolute -top-3 left-3 px-1 bg-black">
+                <span className="text-yellow-400 font-zalando text-xs">SENHA</span>
               </div>
 
               <input
                 required
                 type={showPassword ? "text" : "password"}
+                name="senha"
+                value={form.senha}
+                onChange={handleChange}
                 placeholder=" "
                 className="peer bg-black text-primaria w-full rounded-lg px-3 py-3 focus:outline-none"
               />
@@ -142,7 +167,6 @@ const Login = () => {
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </div>
-
             </div>
 
             <div className='mb-3'>
@@ -159,24 +183,23 @@ const Login = () => {
               Entrar
             </button>
 
-<div className='mt-3 rounded-xl bg-[#1d1c1d] h-[1.9px]' ></div>
+            <div className='mt-3 rounded-xl bg-[#1d1c1d] h-[1.9px]' ></div>
 
-         {/* BOTÃO GOOGLE PERSONALIZADO */}
-          <div className="mt-4">
-            <button
-            type='button'
-              onClick={loginGoogle}
-              className="w-full bg-secundaria hover:bg-primaria text-primaria hover:text-secundaria  py-3 px-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-300 font-zalando font-semibold shadow-md hover:shadow-lg active:scale-95"
-            >
-              <FaGoogle  className="text-2xl" />
-              <span className="text-sm md:text-base">Continuar  com Google</span>
-            </button>
-          </div>
-
+            {/* GOOGLE */}
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={loginGoogle}
+                className="w-full bg-secundaria hover:bg-primaria text-primaria hover:text-secundaria py-3 px-4 rounded-lg flex items-center justify-center gap-3 transition-all duration-300 font-zalando font-semibold shadow-md hover:shadow-lg active:scale-95"
+              >
+                <FaGoogle className="text-2xl" />
+                <span className="text-sm md:text-base">Continuar com Google</span>
+              </button>
+            </div>
 
             <div className="text-center font-zalando text-secundaria text-sm mt-2">
               Não tem conta ?{" "}
-              <a href="/cadastro" className="text-primaria font-zalando font-semibold hover:underline">
+              <a href="/cadastro" className="text-primaria font-semibold hover:underline">
                 Cadastre-se
               </a>
             </div>
@@ -184,7 +207,6 @@ const Login = () => {
           </form>
         </div>
       </div>
-
     </div>
   );
 };
