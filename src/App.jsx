@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import UserSetup from "./pages/UserSetup";
 import MinhasContas from './pages/MinhasContas';
 import Login from './pages/login';
-import Cadastro from './pages/cadastro';
+import Cadastro from './pages/Cadastro';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
