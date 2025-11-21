@@ -9,6 +9,7 @@ module.exports = {
       fontFamily: {
         zalando: ['"Zalando Sans Expanded"', 'sans-serif'],
         space:['"Special Gothic Expanded One"','sans-serif'],
+        number: ['"Chivo"', 'sans-serif'],
       },
       colors: {
         "primaria": "#ffbb00", 
