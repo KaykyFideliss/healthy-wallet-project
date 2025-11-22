@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { HeroGeometricSettings } from "../components/home/Shade-Landing-Settings";
+import { MdEmail } from "react-icons/md";
+import { FaPhoneAlt, FaUser  } from "react-icons/fa";
+import { FaMoneyBillTrendUp } from "react-icons/fa6";
+
 
 export default function UserSettings() {
   const [userData, setUserData] = useState(null);
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchUserInfo();
@@ -16,7 +20,7 @@ export default function UserSettings() {
     const { data, error } = await supabase
       .from("profiles")
       .select("nome, sobrenome, email, telefone, idade, salario, avatar_url")
-      .eq("id", user.id) 
+      .eq("id", user.id)
       .single();
 
     if (!error && data) {
@@ -24,173 +28,89 @@ export default function UserSettings() {
     }
   };
 
-  const handleAvatarUpload = async (event) => {
-    try {
-      setUploading(true);
-      
-      const file = event.target.files[0];
-      if (!file) return;
+if (!userData) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+}
 
-      // Verificar tamanho e tipo do arquivo
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Arquivo muito grande. Use imagens menores que 2MB.');
-        return;
-      }
-
-      if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione um arquivo de imagem.');
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        alert('Usuário não autenticado.');
-        return;
-      }
-
-      // Primeiro, verificar se o bucket existe
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) {
-        console.error('Erro ao listar buckets:', bucketsError);
-        throw new Error('Erro de configuração do storage');
-      }
-
-      const avatarsBucket = buckets.find(bucket => bucket.name === 'avatars');
-      if (!avatarsBucket) {
-        throw new Error('Bucket "avatars" não encontrado. Crie o bucket no Supabase Dashboard primeiro.');
-      }
-
-      // Nome do arquivo
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-
-      console.log('Fazendo upload para:', filePath);
-
-      // Fazer upload
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error('Erro detalhado do upload:', uploadError);
-        throw uploadError;
-      }
-
-      // Obter URL pública
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      console.log('URL pública:', publicUrl);
-
-      // Atualizar perfil
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
-
-      if (updateError) throw updateError;
-
-      // Atualizar estado
-      setUserData(prev => ({ ...prev, avatar_url: publicUrl }));
-      
-      alert('Foto atualizada com sucesso!');
-      
-    } catch (error) {
-      console.error('Erro completo no upload:', error);
-      
-      if (error.message.includes('Bucket not found')) {
-        alert('Bucket não configurado. Crie um bucket chamado "avatars" no Supabase Dashboard em Storage.');
-      } else {
-        alert('Erro ao fazer upload: ' + error.message);
-      }
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  if (!userData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-xl">
-        Carregando informações...
-      </div>
-    );
-  }
 
   return (
-    <section className="min-h-screen py-10 flex justify-center">
-      <div className="p-6 rounded-2xl shadow-lg w-full">
-        <div className="flex items-center px-2 mb-6 justify-evenly flex-col md:flex-row">
-          <div className="relative">
-            <img 
-              src={userData.avatar_url || "./img/Avatares/User-hw.png"} 
-              alt="Avatar do usuário" 
-              className="bg-black rounded-full h-72 w-72 pt-3 mb-10 object-cover border-2 border-yellow-400"
-            />
-            
-            <label 
-              htmlFor="avatar-upload"
-              className={`absolute bottom-4 right-4 bg-yellow-500 text-black p-3 rounded-full cursor-pointer hover:bg-yellow-400 transition-all ${
-                uploading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {uploading ? '⏳' : '📷'}
-            </label>
-            
-            <input
-              id="avatar-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarUpload}
-              disabled={uploading}
-              className="hidden"
-            />
-            
-            {uploading && (
-              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm">Enviando...</span>
+   
+    <section className=" flx justify-center relative overflow-hidden">
+
+<HeroGeometricSettings
+  title1="Bem-vindo a tela do usuário,"
+   title2={` ${userData.nome}`}
+  description="Aqui você pode gerenciar suas informações pessoais e preferências de conta de forma segura e eficiente."
+/>
+
+     {/* INFORMAÇÕES */}
+        <div className="space-y-6 w-full mt-10  py-16 px-4">
+          <div className="items-center justify-center flex flex-col">
+          <h3 className="text-xl md:text-4xl lg:text-6xl justify-center flex font-semibold font-zalando text-white">
+            Informações da Conta
+          </h3>
+          <p className="font-zalando text-white text-center mt-2 md:mt-4 lg:mt-6 max-w-2xl">
+            Gerencie suas informações pessoais e mantenha seus dados atualizados para uma melhor experiência.
+          </p>
+</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-zalando lg:mx-52 py-16">
+
+            <div className="flex h-36 border-2 border-primaria rounded-xl shadow-md items-center justify-center ">
+              <div className="text-primaria mr-3 text-2xl"> 
+              <MdEmail />
               </div>
-            )}
-          </div>
-          
-          <div className="md:ml-10 flex-1 items-center text-center md:text-left">
-            <h2 className="text-2xl font-bold mb-4 font-zalando text-yellow-400">
-              Oi, {userData.nome} {userData.sobrenome}
-            </h2>
-            <p className="text-white font-zalando text-xs tracking-wide">
-              Clique no ícone da câmera para alterar sua foto de perfil.
-            </p>        
+              <p className="text-primaria font-semibold text-xl md:text-2xl lg:text-2xl">Email :</p>
+              <p className="text-white  mt-1 pl-2">{userData.email || "Não informado"}</p>
+            </div>
+
+               <div className="flex h-36 border-2 border-primaria rounded-xl shadow-md items-center justify-center">
+              <div className="text-primaria mr-1 text-base md:text-2xl lg:text-2xl"> 
+              <FaPhoneAlt />
+              </div>
+               <p className="text-primaria font-semibold text-xl md:text-2xl lg:text-2xl">Telefone :</p>
+              <p className="text-white mt-1 pl-2">{userData.telefone || "Não informado"}</p>
+            </div>
+
+            <div className="flex h-36 border-2 border-primaria rounded-xl shadow-md items-center justify-center">
+              <div className="text-primaria mr-3 text-2xl"> 
+              <FaUser />
+              </div>
+              <p className="text-primaria font-semibold text-2xl">Idade :</p>
+              <p className="text-white text-xl mt-1 pl-2">{userData.idade || "Não informado"}</p>
+            </div>
+
+           <div className="flex h-36 border-2 border-primaria rounded-xl shadow-md items-center justify-center">
+              <div className="text-primaria mr-3 text-2xl"> 
+              <FaMoneyBillTrendUp   />
+              </div>
+              <p className="text-primaria font-semibold text-2xl">Salário :</p>
+              <p className="text-white text-xl mt-1 pl-2">
+                {userData.salario ? `R$ ${userData.salario}` : "Não informado"}
+              </p>
+            </div>
           </div>
         </div>
-
-        <div className="space-y-3 text-lg text-primaria font-zalando">
-          <h3 className="text-xl font-semibold mb-4 font-zalando text-white">Suas Informações</h3>
-          <div className="grid grid-cols-2 gap-4 text-xs md:text-sm">
-            <p><strong className="text-white">Telefone:</strong> {userData.telefone || "Não informado"}</p>
-            <p><strong className="text-white">Idade:</strong> {userData.idade || "Não informado"}</p>
-            <p><strong className="text-white">Salário:</strong> 
-              {userData.salario ? ` R$ ${userData.salario}` : " Não informado"}
-            </p>
-          </div>
-        </div>
-
-        <hr className="my-6 border-yellow-400" />
-
+  {/* BOTÃO DE SAIR */}
+  <div className="m-2">
         <button
           onClick={async () => {
             await supabase.auth.signOut();
             window.location.href = "/login";
           }}
-          className="w-full bg-yellow-500 text-black font-semibold rounded-lg py-2 hover:bg-yellow-400 transition-all"
+          className="w-full mt-10 bg-yellow-500 font-zalando text-black font-semibold rounded-xl py-3 
+          hover:bg-yellow-400 transition-all shadow-lg hover:shadow-yellow-400/20"
         >
           Sair da Conta
         </button>
-      </div>
+</div>
+
+ 
+
+    
     </section>
   );
 }

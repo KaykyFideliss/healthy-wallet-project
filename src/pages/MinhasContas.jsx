@@ -462,6 +462,20 @@ export default function MinhasContas() {
           )}
         </div>
 
+      <div className="mt-6 flex gap-4 items-center justify-center font-zalando text-sm">
+        <div className="flex items-center gap-2">
+          <p className="h-3 w-3 rounded-full bg-red-600"></p>
+        <p>Atrasada</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="h-3 w-3 rounded-full bg-yellow-600"></p>
+        <p>Pendente</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="h-3 w-3 rounded-full bg-green-600"></p>
+        <p>Pago</p>
+        </div>
+      </div>
         {/* Mensagem modo deletar */}
         {modoDeletar && (
           <div className="mt-4 p-3 bg-terciaria rounded-xl font-zalando text-center">
