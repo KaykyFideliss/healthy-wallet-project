@@ -1,28 +1,39 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import 'boxicons/css/boxicons.min.css';
+import { useAuth } from "../context/AuthContext";
+import "boxicons/css/boxicons.min.css";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { user } = useAuth(); // usuário logado
 
-  // Detecta scroll para mudar o background
   useEffect(() => {
     const handleScroll = () => {
-      const scrolly = window.scrollY;
-      setScrolled(scrolly > 200);
+      setScrolled(window.scrollY > 200);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Faz scroll para o topo sempre que a rota mudar
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location]);
+
+  const links = user
+    ? [
+        { name: "Home", path: "/" },
+        { name: "Minhas Contas", path: "/MinhasContas" },
+        { name: "Settings", path: "/Settings" },
+      ]
+    : [
+        { name: "Home", path: "/" },
+        
+        { name: "Login", path: "/login" },
+      ];
 
   return (
     <motion.header
@@ -30,46 +41,40 @@ const Navbar = () => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       viewport={{ amount: 0.5 }}
-      className={`fixed top-0 left-0 w-full h-16 flex justify-center items-center z-40 transition-colors duration-500  ${
+      className={`fixed top-0 left-0 w-full h-16 flex justify-center items-center z-40 transition-colors duration-500 ${
         scrolled ? "bg-terciaria backdrop-blur-md" : "bg-transparent"
       }`}
     >
-      {/* Links Desktop */}
-      <div className="hidden h-16 md:flex justify-between items-center w-full px-8 text-center">
-        {/* Logo */}
-        <div>
-          <Link to="/">
-            <img src="img/Healthy-logo.png" alt="Foto-logo" className="pt-2 w-24 h-24" />
-          </Link>
-        </div>
+      {/* DESKTOP */}
+      <div className="hidden h-16 md:flex justify-between items-center w-full px-8">
+        
+        <Link to="/">
+          <img src="img/Healthy-logo.png" alt="Logo" className="pt-2 w-24 h-24" />
+        </Link>
 
-        {/* Links */}
         <div className="flex gap-8 items-center">
-          {["Home", "Download", "Login"].map((item) => (
+          {links.map((item) => (
             <Link
-              key={item}
-              to={`/${item === "Home" ? "" : item.toLowerCase()}`}
-              className="text-sm tracking-wider transition-colors text-[#ffbb00] hover:text-secundaria font-zalando"
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
+              key={item.name}
+              to={item.path}
+              className="text-sm tracking-wider text-[#ffbb00] hover:text-secundaria font-zalando"
             >
-              {item}
+              {item.name}
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Botão Mobile */}
+      {/* MOBILE BUTTON */}
       <button
-        style={{ zIndex: 60 }}
         className="absolute right-4 md:hidden text-[#ffbb00] text-4xl"
+        style={{ zIndex: 60 }}
         onClick={() => setOpen(!open)}
       >
         <i className={open ? "bx bx-x" : "bx bx-menu"}></i>
       </button>
 
-      {/* Menu Mobile */}
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -83,17 +88,14 @@ const Navbar = () => {
             }}
             className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center bg-terciaria text-xl z-50"
           >
-            {["Home", "Download","Login"].map((item) => (
+            {links.map((item) => (
               <Link
-                key={item}
-                to={`/${item === "Home" ? "" : item.toLowerCase()}`}
-                className="hover:text-[#ffc52c] font-zalando text-primaria text-2xl mb-4"
-                onClick={() => {
-                  setOpen(false);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
+                key={item.name}
+                to={item.path}
+                onClick={() => setOpen(false)}
+                className="text-2xl mb-4 text-primaria hover:text-[#ffc52c] font-zalando"
               >
-                {item}
+                {item.name}
               </Link>
             ))}
           </motion.div>

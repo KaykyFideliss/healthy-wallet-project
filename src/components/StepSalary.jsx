@@ -1,11 +1,43 @@
 import React, { useState } from "react";
+import { supabase } from "../lib/supabaseClient";
+import { useNavigate } from "react-router-dom";
 
-export default function StepSalary({ onNext, onPrev, data }) {
+export default function StepSalary({ onPrev, data }) {
+  const navigate = useNavigate();
   const [salary, setSalary] = useState(data.salary || "");
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!salary) return alert("Digite seu salário!");
-    onNext({ salary });
+
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user;
+
+    if (!user) {
+      alert("Usuário não encontrado!");
+      return;
+    }
+
+    const payload = {
+      id: user.id, // 👈 Aqui é o certo!
+      nome: data.nome,
+      sobrenome: data.sobrenome,
+      email: user.email,
+      telefone: data.telefone || null,
+      idade: Number(data.age),
+      salario: Number(salary)
+    };
+
+    const { error } = await supabase
+      .from("profiles")
+      .upsert(payload);
+
+    if (error) {
+      console.error(error);
+      alert("Erro ao salvar os dados!");
+      return;
+    }
+
+    navigate("/MinhasContas");
   };
 
   return (

@@ -4,8 +4,10 @@ import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // ⬅ IMPORTANTE
 
 const Login = () => {
+  const navigate = useNavigate(); // ⬅ Agora usamos navegação react-router
   const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
@@ -39,19 +41,19 @@ const Login = () => {
 
     const userId = data.user.id;
 
-    // Verifica se o user já tem setup feito
+    // Verifica se o usuário já terminou o UserSetup
     const { data: profile } = await supabase
-      .from("users")
+      .from("profiles")
       .select("salario, idade")
       .eq("id", userId)
       .single();
 
     if (!profile || profile.salario === null || profile.idade === null) {
-      window.location.href = "/UserSetup";
+      navigate("/Settings");
       return;
     }
 
-    window.location.href = "/MinhasContas";
+    navigate("/MinhasContas");
   };
 
   // --------------------------------------------------
@@ -61,7 +63,6 @@ const Login = () => {
     onSuccess: async (tokenResponse) => {
       const { access_token } = tokenResponse;
 
-      // pega dados básicos para exibir (não é obrigatório)
       const googleUser = await axios.get(
         "https://www.googleapis.com/oauth2/v3/userinfo",
         {
@@ -71,10 +72,7 @@ const Login = () => {
         }
       );
 
-      const email = googleUser.data.email;
-
-      // Login OAuth no Supabase
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
       });
 
@@ -83,8 +81,6 @@ const Login = () => {
         setErro("Erro no login com Google");
         return;
       }
-
-      // Supabase vai redirecionar sozinho para a URL configurada
     },
     onError: () => setErro("Erro ao tentar login com Google"),
   });

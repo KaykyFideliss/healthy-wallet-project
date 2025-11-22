@@ -1,28 +1,69 @@
-import { Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Navbar from './components/Navbar';
+import { Routes, Route, Navigate } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Login from "./pages/login";
+import Cadastro from "./pages/Cadastro";
 import UserSetup from "./pages/UserSetup";
-import MinhasContas from './pages/MinhasContas';
-import Login from './pages/login';
-import Cadastro from './pages/Cadastro';
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import MinhasContas from "./pages/MinhasContas";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import UserSettings from "./pages/UserSettings";
+
+// 🔐 Rota protegida
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+
+  if (user === undefined) {
+    return (
+      <div className="text-white text-center pt-10 text-lg">
+        Carregando...
+      </div>
+    );
+  }
+
+  return user ? children : <Navigate to="/Login" />;
+};
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId="16111024494-4ce3in6cah7hic3eoma1ml12evv6h2pe.apps.googleusercontent.com">
-      <>
-        <Navbar />
+    <AuthProvider>
+      <Navbar />
 
-        {/* ROTAS */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/UserSetup" element={<UserSetup />} />
-          <Route path="/MinhasContas" element={<MinhasContas />} />
-          <Route path="/Login" element={<Login />} />
-          <Route path="/Cadastro" element={<Cadastro />} />
-        </Routes>
-      </>
-    </GoogleOAuthProvider>
+      <Routes>
+        {/* Páginas públicas */}
+        <Route path="/" element={<Home />} />
+        <Route path="/Login" element={<Login />} />
+        <Route path="/Cadastro" element={<Cadastro />} />
+
+        {/* Páginas que exigem login */}
+        <Route
+          path="/UserSetup"
+          element={
+            <ProtectedRoute>
+              <UserSetup />
+            </ProtectedRoute>
+          }
+        />
+
+       <Route path="/Settings" element={
+  <ProtectedRoute>
+    <UserSettings />
+  </ProtectedRoute>
+} />
+
+
+        <Route
+          path="/MinhasContas"
+          element={
+            <ProtectedRoute>
+              <MinhasContas />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Redirecionamento para rota padrão */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
