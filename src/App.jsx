@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/login";
-import Cadastro from "./pages/Cadastro";
+import Cadastro from "./pages/cadastro";
 import UserSetup from "./pages/UserSetup";
 import MinhasContas from "./pages/MinhasContas";
 import { AuthProvider, useAuth } from "./context/AuthContext";
