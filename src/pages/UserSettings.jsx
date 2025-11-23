@@ -95,7 +95,7 @@ if (!userData) {
           </div>
         </div>
   {/* BOTÃO DE SAIR */}
-  <div className="m-2">
+  <div className="m-2 mx-10">
         <button
           onClick={async () => {
             await supabase.auth.signOut();

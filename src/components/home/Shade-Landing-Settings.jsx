@@ -115,7 +115,7 @@ export function HeroGeometricSettings({
                 {title1}
               </span>
               <br />
-              <span className={cn("bg-clip-text text-6xl sm:text-8xl md:text-9xl text-transparent font-zalando bg-gradient-to-r from-primaria via-primaria/90 to-primaria/95")}>
+              <span className={cn("bg-clip-text text-6xl sm:text-8xl md:text-9xl text-transparent font-zalando bg-gradient-to-r from-primaria via-primaria/90 to-primaria/95 ")}>
                 {title2}
               </span>
             </h1>
