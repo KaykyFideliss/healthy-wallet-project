@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { MdEmail } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaUserAlt, FaPhone } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
-import { useNavigate } from "react-router-dom";
+
+import { Link } from "react-router-dom";
+
 
 const Cadastro = () => {
   const navigate = useNavigate();
@@ -210,12 +212,11 @@ const Cadastro = () => {
 
             <div className="text-center font-zalando text-secundaria text-sm mt-2">
               Já tem conta?{" "}
-              <a
-                href="/login"
-                className="text-primaria font-zalando font-semibold hover:underline"
-              >
-                Faça login
-              </a>
+           <Link to="/login" className="text-primaria font-zalando font-semibold hover:underline">
+  Faça login
+</Link>
+              
+              
             </div>
           </form>
         </div>
