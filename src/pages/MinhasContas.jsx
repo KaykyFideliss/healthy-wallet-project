@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { FaPlus, FaTrash, FaArrowLeft } from "react-icons/fa";
+import { FaPlus, FaTrash, FaArrowLeft, FaCheckCircle, FaChevronDown } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -23,7 +24,7 @@ export default function MinhasContas() {
   const [modoDeletar, setModoDeletar] = useState(false);
   const [contaParaDeletar, setContaParaDeletar] = useState(null);
 
-  // filtro: all / vencidas / quase / ok
+  // filtro: all / vencidas / quase / ok / pagas
   const [filtro, setFiltro] = useState("all");
 
   // Carregar tabelas do Supabase quando user estiver pronto
@@ -32,6 +33,39 @@ export default function MinhasContas() {
     loadTabelas();
   }, [user]);
 
+  // ---------- Helpers ----------
+  const formatarDataBR = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const isPastDate = (isoDate) => {
+    if (!isoDate) return false;
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+    const venc = new Date(isoDate);
+    venc.setHours(0,0,0,0);
+    return venc < hoje;
+  };
+
+  const calcularParcela = (valor, parcelas) => {
+    const v = Number(valor);
+    const p = Number(parcelas);
+    if (!v || !p) return null;
+    return v / p;
+  };
+
+  const formatMoney = (v) => {
+    if (v === null || v === undefined || v === "") return "";
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(v));
+  };
+
+  // ---------- Load / CRUD ----------
   const loadTabelas = async () => {
     try {
       const { data, error } = await supabase
@@ -44,6 +78,21 @@ export default function MinhasContas() {
       setTabelas(data || []);
     } catch (err) {
       console.error("Erro ao carregar tabelas:", err);
+    }
+  };
+
+  const loadContas = async (tabelaId) => {
+    try {
+      const { data, error } = await supabase
+        .from("contas")
+        .select("id, nome, vencimento, parcelas, valor, status, created_at")
+        .eq("tabela_id", tabelaId)
+        .order("vencimento", { ascending: true });
+
+      if (error) throw error;
+      setContas(data || []);
+    } catch (err) {
+      console.error("Erro ao carregar contas:", err);
     }
   };
 
@@ -63,7 +112,7 @@ export default function MinhasContas() {
       setNomeNovaTabela("");
       setCriandoNovaTabela(false);
       setShowTable(true);
-      loadContas(data.id);
+      await loadContas(data.id);
     } catch (err) {
       console.error("Erro criar tabela:", err);
       alert("Erro ao criar tabela");
@@ -74,7 +123,7 @@ export default function MinhasContas() {
     e.stopPropagation();
     if (!window.confirm("Tem certeza que quer deletar esta tabela e suas contas?")) return;
     try {
-      // deletar contas associadas (opcional, mas recomendado)
+      // deletar contas associadas
       const { error: delContError } = await supabase
         .from("contas")
         .delete()
@@ -114,24 +163,6 @@ export default function MinhasContas() {
     setNovaConta({ nome: "", vencimento: "", parcelas: "", valor: "" });
   };
 
-  // Carregar contas da tabela (ordenadas por vencimento asc)
-  const loadContas = async (tabelaId) => {
-    try {
-      const { data, error } = await supabase
-        .from("contas")
-        .select("id, nome, vencimento, parcelas, valor, created_at")
-        .eq("tabela_id", tabelaId)
-        .order("vencimento", { ascending: true }); // ordena pelo vencimento (YYYY-MM-DD)
-
-      if (error) throw error;
-
-      setContas(data || []);
-    } catch (err) {
-      console.error("Erro ao carregar contas:", err);
-    }
-  };
-
-  // adicionar conta (vencimento deve ser YYYY-MM-DD -> usamos input type=date)
   const handleAddConta = async () => {
     if (!novaConta.nome || !novaConta.vencimento || !novaConta.valor) {
       alert("Preencha nome, vencimento e valor.");
@@ -139,13 +170,20 @@ export default function MinhasContas() {
     }
     if (!tabelaAtual) return alert("Selecione uma tabela.");
 
+    // aviso se data passada
+    if (isPastDate(novaConta.vencimento)) {
+      const ok = window.confirm("⚠️ A data informada já passou. Deseja continuar mesmo assim?");
+      if (!ok) return;
+    }
+
     try {
       const payload = {
         tabela_id: tabelaAtual.id,
         nome: novaConta.nome,
-        vencimento: novaConta.vencimento, // assume YYYY-MM-DD
+        vencimento: novaConta.vencimento,
         parcelas: novaConta.parcelas ? Number(novaConta.parcelas) : null,
-        valor: novaConta.valor ? Number(novaConta.valor) : null
+        valor: novaConta.valor ? Number(novaConta.valor) : null,
+        status: "pendente"
       };
 
       const { data, error } = await supabase
@@ -156,15 +194,9 @@ export default function MinhasContas() {
 
       if (error) throw error;
 
-      // atualizar lista local (já ordenada por vencimento)
-      const novas = [...contas, data].sort((a, b) =>
-        new Date(a.vencimento) - new Date(b.vencimento)
-      );
+      const novas = [...contas, data].sort((a, b) => new Date(a.vencimento) - new Date(b.vencimento));
       setContas(novas);
-
-      // atualizar a contagem na lista de tabelas (opcional: recarregar tabelas)
       await loadTabelas();
-
       setNovaConta({ nome: "", vencimento: "", parcelas: "", valor: "" });
     } catch (err) {
       console.error("Erro adicionar conta:", err);
@@ -172,7 +204,6 @@ export default function MinhasContas() {
     }
   };
 
-  // deletar conta
   const handleDeleteConta = async (contaId) => {
     if (!window.confirm("Deseja realmente deletar esta conta?")) return;
     try {
@@ -210,13 +241,14 @@ export default function MinhasContas() {
     setContaParaDeletar(null);
   };
 
-  // Helper status de vencimento
-  const getStatus = (vencimentoISO) => {
-    if (!vencimentoISO) return "ok";
+  const getStatus = (conta) => {
+    if (!conta) return "ok";
+    if (conta.status === "pago") return "pago";
+    if (!conta.vencimento) return "ok";
     const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    const venc = new Date(vencimentoISO);
-    venc.setHours(0, 0, 0, 0);
+    hoje.setHours(0,0,0,0);
+    const venc = new Date(conta.vencimento);
+    venc.setHours(0,0,0,0);
     const diffMs = venc - hoje;
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
     if (diffDays < 0) return "vencida";
@@ -224,17 +256,34 @@ export default function MinhasContas() {
     return "ok";
   };
 
-  // Aplicar filtro localmente (já temos contas carregadas)
   const contasFiltradas = contas
     .filter((c) => {
       if (filtro === "all") return true;
-      const status = getStatus(c.vencimento);
+      if (filtro === "pagas") return c.status === "pago";
+      const status = getStatus(c);
       if (filtro === "vencidas") return status === "vencida";
       if (filtro === "quase") return status === "quase";
       if (filtro === "ok") return status === "ok";
       return true;
     })
-    .sort((a, b) => new Date(a.vencimento) - new Date(b.vencimento));
+    .sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
+
+  const togglePago = async (conta) => {
+    try {
+      const novoStatus = conta.status === "pago" ? "pendente" : "pago";
+      const { error } = await supabase
+        .from("contas")
+        .update({ status: novoStatus })
+        .eq("id", conta.id);
+
+      if (error) throw error;
+
+      setContas((prev) => prev.map((c) => (c.id === conta.id ? { ...c, status: novoStatus } : c)));
+    } catch (err) {
+      console.error("Erro ao atualizar status:", err);
+      alert("Erro ao atualizar status");
+    }
+  };
 
   // render
   if (!showTable) {
@@ -298,8 +347,6 @@ export default function MinhasContas() {
                     </button>
                   </div>
                   <p className="text-sm text-secundaria font-zalando mt-2">
-                    {/* contar contas de forma precisa via select seria melhor, aqui mostramos total local */}
-                    {/** opcional: fetch count */}
                     Clique para abrir
                   </p>
                 </div>
@@ -333,65 +380,107 @@ export default function MinhasContas() {
 
         {/* filtros e ações */}
         <div className="flex flex-col md:flex-row items-center gap-3 mb-4 ">
-          <div className="flex gap-2 items-center BG-white p-2 rounded-md">
-            <label className="font-zalando mr-2">Filtrar:</label>
-            <select value={filtro} onChange={(e) => setFiltro(e.target.value)} className="p-2 rounded-md text-primaria bg-transparent font-zalando bg-black">
-              <option value="all">Todas</option>
-              <option value="vencidas">Vencidas</option>
-              <option value="quase">Quase (≤3 dias)</option>
-              <option value="ok">Ok</option>
-            </select>
+          <div className="flex gap-2 items-center relative">
+            <label className="font-zalando mr-4">Filtrar:</label>
+
+            {/* custom select com fundo preto e seta */}
+            <div className="relative inline-block">
+              <select
+                value={filtro}
+                onChange={(e) => setFiltro(e.target.value)}
+                className="appearance-none p-2 rounded-md text-primaria bg-black font-zalando pr-8"
+                style={{ minWidth: 160 }}
+              >
+                <option value="all">Todas</option>
+                <option value="vencidas">Vencidas</option>
+                <option value="quase">Quase (≤3 dias)</option>
+                <option value="ok">Ok</option>
+                <option value="pagas">Pagas</option>
+              </select>
+
+              {/* ícone de seta posicionado */}
+              <FaChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-primaria pointer-events-none" />
+            </div>
           </div>
 
-          
+        
         </div>
 
         {/* Cabeçalho */} 
-        <div className="bg-primaria font-zalando mx-1 text-black font-semibold rounded-xl flex justify-between md:justify-around pl-1 pr-1 py-3">
-          <span className="text-xs md:text-lg lg:text-3xl">NOME</span>
-          <span className="text-xs pl-0 md:text-lg md:pl-14 lg:text-3xl">VENCIMENTO</span>
-          <span className="text-xs md:text-lg lg:text-3xl">PARCELAS</span>
-          <span className="text-xs md:text-lg lg:text-3xl">VALOR</span>
-        </div>
+    <div className="bg-primaria font-zalando mx-1 text-black font-semibold rounded-xl 
+  flex justify-between items-center px-3 py-3 gap-4">
+  <span className="w-32 text-[11px] md:text-lg lg:text-2xl">NOME</span>
+  <span className="w-32 text-[11px] md:text-lg lg:text-2xl">VENCIMENTO</span>
+  <span className="w-24 text-[11px] md:text-lg lg:text-2xl  ">PARCELAS</span>
+  <span className="w-32 text-[11px] md:text-lg lg:text-2xl text-center">VALOR</span>
+  
+</div>
+
 
         {/* Linhas da tabela */}
-        {contasFiltradas.map((conta) => {
-          const status = getStatus(conta.vencimento);
-          const rowClass =
-            modoDeletar
-              ? contaParaDeletar === conta.id
-                ? "bg-yellow-500 animate-pulse text-black"
-                : "bg-primaria hover:bg-yellow-300 text-black cursor-pointer"
-              : status === "vencida"
-                ? "bg-red-600 text-white"
-                : status === "quase"
-                ? "bg-yellow-300 text-black"
-                : "bg-primaria text-black";
+       {contasFiltradas.map((conta) => {
+  const status = getStatus(conta);
+  const valorParcela = calcularParcela(conta.valor, conta.parcelas);
 
-          return (
-            <div
-              key={conta.id}
-              onClick={() => handleClickLinha(conta)}
-              className={`font-zalando flex justify-between lg:gap-4 px-1 md:px-16 lg:px-20 py-1 mt-2 rounded-xl mx-1 items-center transition-all ${rowClass}`}
-            >
-              <span className="text-xs w-16 md:w-24 md:text-lg lg:text-2xl break-keep">{conta.nome}</span>
-              <span className="w-28 text-[12px] md:w-36 md:text-[17px]">{conta.vencimento}</span>
-              <span className="text-base items-center flex justify-center w-16">{conta.parcelas}</span>
-              <span className="text-xs flex justify-center w-16 md:text-lg md:pl-6">{conta.valor}</span>
+  const rowClass =
+    status === "pago"
+      ? "bg-green-600 text-white"
+      : status === "vencida"
+      ? "bg-red-600 text-white"
+      : status === "quase"
+      ? "bg-yellow-300 text-black"
+      : "bg-primaria text-black";
 
-           
-            </div>
-          );
-        })}
+  return (
+    <div
+  key={conta.id}
+  onClick={() => setContaParaDeletar(conta.id)}
+  className={`font-zalando flex items-center justify-between px-3 py-3 mt-2 
+  rounded-xl mx-1 transition-all ${
+    conta.status === "pago"
+      ? "bg-green-600 text-white"
+      : getStatus(conta) === "vencida"
+      ? "bg-red-600 text-white"
+      : getStatus(conta) === "quase"
+      ? "bg-yellow-300 text-black"
+      : "bg-primaria text-black"
+  } ${
+    contaParaDeletar === conta.id ? "ring-4 ring-yellow-400" : ""
+  }`}
+>
+  <span className="w-32 text-xs md:text-lg lg:text-xl">{conta.nome}</span>
+
+  <span className="w-32 text-xs md:text-lg lg:text-xl">
+    {formatarDataBR(conta.vencimento)}
+  </span>
+
+ <span className="w-24 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
+  {conta.parcelas ? `${conta.parcelas}x` : "-"}
+</span>
+
+<span className="w-44 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
+  {conta.parcelas && calcularParcela(conta.valor, conta.parcelas)
+    ? `${formatMoney(calcularParcela(conta.valor, conta.parcelas))} x ${conta.parcelas}`
+    : formatMoney(conta.valor)}
+</span>
+
+
+    
+
+    
+    </div>
+  );
+})}
+
 
         {/* Inputs para adicionar nova conta */}
-        <div className="flex flex-col md:flex-row gap-3 mt-6">
+        <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row gap-3 mt-6">
           <input
             type="text"
             placeholder="Nome da conta"
             value={novaConta.nome}
             onChange={(e) => setNovaConta({ ...novaConta, nome: e.target.value })}
-            className="p-2 min-w-0 rounded-xl font-zalando text-black w-full md:w-1/4"
+            className="p-2 rounded-xl font-zalando text-black w-full md:w-1/4"
           />
 
           {/* input date -> garante formato YYYY-MM-DD */}
@@ -400,7 +489,7 @@ export default function MinhasContas() {
             placeholder="YYYY-MM-DD"
             value={novaConta.vencimento}
             onChange={(e) => setNovaConta({ ...novaConta, vencimento: e.target.value })}
-            className="p-2 rounded-xl font-zalando text-gray-400 w-full md:w-1/4"
+            className="p-2 rounded-xl font-zalando text-black w-full md:w-1/4"
           />
 
           <input
@@ -409,6 +498,7 @@ export default function MinhasContas() {
             value={novaConta.parcelas}
             onChange={(e) => setNovaConta({ ...novaConta, parcelas: e.target.value })}
             className="p-2 rounded-xl font-zalando text-black w-full md:w-1/4"
+            min="1"
           />
 
           <input
@@ -421,46 +511,71 @@ export default function MinhasContas() {
           />
         </div>
 
-        {/* Botões */}
-        <div className="flex flex-col md:flex-row gap-3 mt-5">
-          <button
-            onClick={handleAddConta}
-            disabled={modoDeletar}
-            className={`${modoDeletar ? "bg-gray-400" : "bg-primaria hover:bg-yellow-300"} text-white p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
-          >
-            <FaPlus className="mr-2" />
-            Adicionar
-          </button>
+<div className="flex flex-col md:flex-row gap-3 mt-5">
+  
+  {/* Adicionar */}
+  <button
+    onClick={handleAddConta}
+    disabled={modoDeletar}
+    className={`${modoDeletar ? "bg-gray-400" : "bg-primaria hover:bg-yellow-300"} 
+      text-white p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
+  >
+    <FaPlus className="mr-2" />
+    Adicionar
+  </button>
 
-          {!modoDeletar ? (
-            <button
-              onClick={ativarModoDeletar}
-              className="bg-vermelho text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-red-500 transition flex-1"
-            >
-              <FaTrash className="mr-2" />
-              Deletar Linha
-            </button>
-          ) : (
-            <div className="flex gap-3 flex-1">
-              <button
-                onClick={confirmarDelecao}
-                disabled={!contaParaDeletar}
-                className={`${!contaParaDeletar ? "bg-gray-400" : "bg-vermelho hover:bg-red-500"} text-black p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
-              >
-                Confirmar Deleção
-              </button>
-              <button
-                onClick={() => {
-                  setModoDeletar(false);
-                  setContaParaDeletar(null);
-                }}
-                className="bg-gray-500 text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-gray-600 transition flex-1"
-              >
-                Cancelar
-              </button>
-            </div>
-          )}
-        </div>
+  {/* Deletar linha */}
+  {!modoDeletar ? (
+    <button
+      onClick={ativarModoDeletar}
+      className="bg-vermelho text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-red-500 transition flex-1"
+    >
+      <FaTrash className="mr-2" />
+      Deletar Linha
+    </button>
+  ) : (
+    <div className="flex gap-3 flex-1">
+      <button
+        onClick={confirmarDelecao}
+        disabled={!contaParaDeletar}
+        className={`${!contaParaDeletar ? "bg-gray-400" : "bg-vermelho hover:bg-red-500"} 
+        text-black p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
+      >
+        Confirmar Deleção
+      </button>
+
+      <button
+        onClick={() => {
+          setModoDeletar(false);
+          setContaParaDeletar(null);
+        }}
+        className="bg-gray-500 text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-gray-600 transition flex-1"
+      >
+        Cancelar
+      </button>
+    </div>
+  )}
+
+  {/* BOTÃO PAGAR / DESMARCAR */}
+  {contaParaDeletar && !modoDeletar && (
+    <button
+      onClick={() => togglePago(contas.find(c => c.id === contaParaDeletar))}
+      className={`${
+        contas.find(c => c.id === contaParaDeletar).status === "pago"
+          ? "bg-red-700 hover:bg-red-800"
+          : "bg-green-600 hover:bg-green-700"
+      } 
+      text-white font-zalando p-3 rounded-xl flex items-center justify-center transition flex-1`}
+    >
+      {contas.find(c => c.id === contaParaDeletar).status === "pago"
+        ? "Desmarcar Pago"
+        : "Marcar como Pago"}
+    </button>
+  )}
+
+</div>
+
+
 
       <div className="mt-6 flex gap-4 items-center justify-center font-zalando text-sm">
         <div className="flex items-center gap-2">
@@ -476,6 +591,7 @@ export default function MinhasContas() {
         <p>Pago</p>
         </div>
       </div>
+
         {/* Mensagem modo deletar */}
         {modoDeletar && (
           <div className="mt-4 p-3 bg-terciaria rounded-xl font-zalando text-center">
