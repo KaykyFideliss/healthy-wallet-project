@@ -71,7 +71,7 @@ if (!userData) {
               <div className="text-primaria mr-1 text-base md:text-2xl lg:text-2xl"> 
               <FaPhoneAlt />
               </div>
-               <p className="text-primaria font-semibold text-xl md:text-2xl lg:text-2xl">Telefone :</p>
+               <p className="text-primaria font-semibold text-xl md:text-2xl lg:text-2xl">Tel :</p>
               <p className="text-white mt-1 pl-2">{userData.telefone || "Não informado"}</p>
             </div>
 

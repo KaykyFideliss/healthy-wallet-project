@@ -42,19 +42,20 @@ const Login = () => {
 
     const userId = data.user.id;
 
-    // Verifica se o usuário já terminou o UserSetup
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("salario, idade")
-      .eq("id", userId)
-      .single();
+// Verifica se o usuário já terminou o UserSetup
+const { data: profile } = await supabase
+  .from("profiles")
+  .select("salario, idade")
+  .eq("id", userId)
+  .single();
 
-    if (!profile || profile.salario === null || profile.idade === null) {
-      navigate("/Settings");
-      return;
-    }
+if (!profile || profile.salario === null || profile.idade === null) {
+  navigate("/UserSetup");
+  return;
+}
 
-    navigate("/MinhasContas");
+navigate("/MinhasContas");
+
   };
 
   // --------------------------------------------------
