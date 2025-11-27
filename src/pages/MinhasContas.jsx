@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrash, FaArrowLeft, FaCheckCircle, FaChevronDown } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { TbCancel } from "react-icons/tb";
 
 export default function MinhasContas() {
   const { user } = useAuth();
@@ -27,11 +27,36 @@ export default function MinhasContas() {
   // filtro: all / vencidas / quase / ok / pagas
   const [filtro, setFiltro] = useState("all");
 
+  // pagamentos (histórico)
+  const [pagamentos, setPagamentos] = useState([]);
+
+  // modal pagamento (registrar)
+  const [mostrarModalPagamento, setMostrarModalPagamento] = useState(false);
+  const [contaParaPagar, setContaParaPagar] = useState(null);
+  const [parcelasPagas, setParcelasPagas] = useState(1);
+
+  // modal cancelar pagamento
+  const [mostrarModalCancelar, setMostrarModalCancelar] = useState(false);
+  const [pagamentoParaCancelar, setPagamentoParaCancelar] = useState(null);
+  const [parcelasCancelar, setParcelasCancelar] = useState(1);
+
+  // seleção de pagamento no histórico (item selecionado)
+  const [pagamentoSelecionadoId, setPagamentoSelecionadoId] = useState(null);
+
   // Carregar tabelas do Supabase quando user estiver pronto
   useEffect(() => {
     if (!user) return;
     loadTabelas();
   }, [user]);
+
+  useEffect(() => {
+    if (tabelaAtual) {
+      loadPagamentos();
+    } else {
+      setPagamentos([]);
+      setPagamentoSelecionadoId(null);
+    }
+  }, [tabelaAtual]);
 
   // ---------- Helpers ----------
   const formatarDataBR = (iso) => {
@@ -85,7 +110,7 @@ export default function MinhasContas() {
     try {
       const { data, error } = await supabase
         .from("contas")
-        .select("id, nome, vencimento, parcelas, valor, status, created_at")
+        .select("id, nome, vencimento, parcelas, valor, status, tabela_id, created_at")
         .eq("tabela_id", tabelaId)
         .order("vencimento", { ascending: true });
 
@@ -93,6 +118,23 @@ export default function MinhasContas() {
       setContas(data || []);
     } catch (err) {
       console.error("Erro ao carregar contas:", err);
+    }
+  };
+
+  const loadPagamentos = async () => {
+    if (!tabelaAtual) return;
+    try {
+      const { data, error } = await supabase
+        .from("pagamentos")
+        .select("*")
+        .eq("tabela_id", tabelaAtual.id)
+        .order("pago_em", { ascending: false });
+
+      if (error) throw error;
+      setPagamentos(data || []);
+      setPagamentoSelecionadoId(null);
+    } catch (err) {
+      console.error("Erro ao carregar pagamentos:", err);
     }
   };
 
@@ -152,6 +194,7 @@ export default function MinhasContas() {
     setModoDeletar(false);
     setContaParaDeletar(null);
     await loadContas(tabela.id);
+    await loadPagamentos();
   };
 
   const voltarParaLista = () => {
@@ -161,6 +204,8 @@ export default function MinhasContas() {
     setModoDeletar(false);
     setContaParaDeletar(null);
     setNovaConta({ nome: "", vencimento: "", parcelas: "", valor: "" });
+    setPagamentos([]);
+    setPagamentoSelecionadoId(null);
   };
 
   const handleAddConta = async () => {
@@ -216,22 +261,22 @@ export default function MinhasContas() {
 
       setContas((prev) => prev.filter((c) => c.id !== contaId));
       await loadTabelas();
+      await loadPagamentos();
     } catch (err) {
       console.error("Erro deletar conta:", err);
       alert("Erro ao deletar conta");
     }
   };
 
-  // marcar linha para deletar (modo simples)
+  // marcar linha para deletar (agora também seleciona para ações)
   const ativarModoDeletar = () => {
     setModoDeletar(true);
     setContaParaDeletar(null);
   };
 
   const handleClickLinha = (conta) => {
-    if (modoDeletar) {
-      setContaParaDeletar(conta.id);
-    }
+    // seleciona a conta que será usada pelos botões abaixo
+    setContaParaDeletar(contaParaDeletar === conta.id ? null : conta.id);
   };
 
   const confirmarDelecao = async () => {
@@ -268,21 +313,167 @@ export default function MinhasContas() {
     })
     .sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
 
-  const togglePago = async (conta) => {
+  // abrir modal de pagamento (escolher quantas parcelas)
+  const abrirModalPagamento = (conta) => {
+    if (!conta) return;
+    setContaParaPagar(conta);
+    setParcelasPagas(1);
+    setMostrarModalPagamento(true);
+  };
+
+  // confirmar pagamento parcial/total
+  const confirmarPagamento = async () => {
+    if (!contaParaPagar) return;
     try {
-      const novoStatus = conta.status === "pago" ? "pendente" : "pago";
-      const { error } = await supabase
+      const conta = contaParaPagar;
+      const parcelasOriginais = conta.parcelas ? Number(conta.parcelas) : 1;
+      const valorTotal = Number(conta.valor) || 0;
+      const valorParcela = parcelasOriginais ? (valorTotal / parcelasOriginais) : valorTotal;
+      const qtdPagas = Number(parcelasPagas);
+
+      // valor pago neste registro
+      const valorPagoRegistro = Number((valorParcela * qtdPagas).toFixed(2));
+
+      // inserir registro em pagamentos
+      const { error: errInsert } = await supabase
+        .from("pagamentos")
+        .insert([{
+          conta_id: conta.id,
+          tabela_id: conta.tabela_id,
+          parcelas_pagas: qtdPagas,
+          valor_pago: valorPagoRegistro,
+          user_id: user.id
+        }]);
+      if (errInsert) throw errInsert;
+
+      // calcular novas parcelas e novo valor restante
+      const novasParcelas = parcelasOriginais - qtdPagas;
+      const novoValor = Number((valorParcela * Math.max(novasParcelas, 0)).toFixed(2));
+
+      // atualizar conta: se zerou, marcar status pago e limpar parcelas/valor; senão reduzir
+      const { error: errUpdate } = await supabase
         .from("contas")
-        .update({ status: novoStatus })
+        .update({
+          parcelas: novasParcelas <= 0 ? null : novasParcelas,
+          valor: novasParcelas <= 0 ? null : novoValor,
+          status: novasParcelas <= 0 ? "pago" : "pendente"
+        })
         .eq("id", conta.id);
 
-      if (error) throw error;
+      if (errUpdate) throw errUpdate;
 
-      setContas((prev) => prev.map((c) => (c.id === conta.id ? { ...c, status: novoStatus } : c)));
+      // recarregar dados
+      await loadContas(tabelaAtual.id);
+      await loadPagamentos();
+
+      setMostrarModalPagamento(false);
+      setContaParaPagar(null);
+      // se seleção era a conta, desmarcar
+      if (contaParaDeletar === conta.id) setContaParaDeletar(null);
+
     } catch (err) {
-      console.error("Erro ao atualizar status:", err);
-      alert("Erro ao atualizar status");
+      console.error("Erro ao confirmar pagamento:", err);
+      alert("Erro ao registrar pagamento");
     }
+  };
+
+  // cancelar pagamento (desfazer total/parcial)
+  const cancelarPagamento = async () => {
+    if (!pagamentoParaCancelar) return;
+
+    try {
+      const pagamento = pagamentoParaCancelar;
+      // buscar conta atual (pode ter sido alterada)
+      const conta = await (async () => {
+        const c = contas.find(c => c.id === pagamento.conta_id);
+        if (c) return c;
+        // fallback: buscar no servidor
+        const { data: contaServer, error: err } = await supabase
+          .from("contas")
+          .select("*")
+          .eq("id", pagamento.conta_id)
+          .single();
+        if (err) throw err;
+        return contaServer;
+      })();
+
+      if (!conta) {
+        alert("Conta não encontrada");
+        return;
+      }
+
+      // valor por parcela aproximado
+      const valorParcela = pagamento.parcelas_pagas && pagamento.parcelas_pagas > 0
+        ? pagamento.valor_pago / pagamento.parcelas_pagas
+        : (conta.valor && conta.parcelas ? Number(conta.valor) / Number(conta.parcelas) : 0);
+
+      const qtdCancelar = Number(parcelasCancelar);
+      if (qtdCancelar <= 0) return alert("Escolha ao menos 1 parcela para desfazer.");
+
+      // novas parcelas da conta = (parcelas atuais ou 0) + qtdCancelar
+      // Nota: aqui assumimos que `conta.parcelas` guarda parcelas restantes (ou null)
+      const parcelasAtuais = conta.parcelas ? Number(conta.parcelas) : 0;
+      const novasParcelas = parcelasAtuais + qtdCancelar;
+      const novoValor = Number((novasParcelas * valorParcela).toFixed(2));
+
+      // atualizar conta
+      const { error: errUpdate } = await supabase
+        .from("contas")
+        .update({
+          parcelas: novasParcelas <= 0 ? null : novasParcelas,
+          valor: novasParcelas <= 0 ? null : novoValor,
+          status: "pendente"
+        })
+        .eq("id", conta.id);
+
+      if (errUpdate) throw errUpdate;
+
+      // ajustar / remover registro de pagamento
+      if (qtdCancelar >= pagamento.parcelas_pagas) {
+        // remover o pagamento por completo
+        const { error: errDel } = await supabase.from("pagamentos").delete().eq("id", pagamento.id);
+        if (errDel) throw errDel;
+      } else {
+        const novasParcelasPagas = pagamento.parcelas_pagas - qtdCancelar;
+        const novoValorPago = Number((novasParcelasPagas * valorParcela).toFixed(2));
+        const { error: errUpd } = await supabase
+          .from("pagamentos")
+          .update({
+            parcelas_pagas: novasParcelasPagas,
+            valor_pago: novoValorPago
+          })
+          .eq("id", pagamento.id);
+        if (errUpd) throw errUpd;
+      }
+
+      // recarregar
+      await loadContas(tabelaAtual.id);
+      await loadPagamentos();
+
+      setMostrarModalCancelar(false);
+      setPagamentoParaCancelar(null);
+      setPagamentoSelecionadoId(null);
+    } catch (err) {
+      console.error("Erro ao cancelar pagamento:", err);
+      alert("Erro ao cancelar pagamento");
+    }
+  };
+
+  // abrir modal de cancelar para o pagamento selecionado no histórico
+  const abrirModalCancelarSelecionado = () => {
+    if (!pagamentoSelecionadoId) return alert("Selecione um pagamento no histórico primeiro.");
+    const p = pagamentos.find(pp => pp.id === pagamentoSelecionadoId);
+    if (!p) return alert("Pagamento não encontrado.");
+    setPagamentoParaCancelar(p);
+    setParcelasCancelar(1);
+    setMostrarModalCancelar(true);
+  };
+
+  // botão para "marcar como pago" (abrir modal usando a conta selecionada)
+  const handleAbrirPagamentoSelecionada = () => {
+    const conta = contas.find(c => c.id === contaParaDeletar);
+    if (!conta) return alert("Selecione uma conta primeiro.");
+    abrirModalPagamento(conta);
   };
 
   // render
@@ -402,40 +593,26 @@ export default function MinhasContas() {
               <FaChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-primaria pointer-events-none" />
             </div>
           </div>
-
-        
         </div>
 
-        {/* Cabeçalho */} 
-    <div className="bg-primaria font-zalando mx-1 text-black font-semibold rounded-xl 
+        {/* Cabeçalho */}
+        <div className="bg-primaria font-zalando mx-1 text-black font-semibold rounded-xl 
   flex justify-between items-center px-3 py-3 gap-4">
-  <span className="w-32 text-[11px] md:text-lg lg:text-2xl">NOME</span>
-  <span className="w-32 text-[11px] md:text-lg lg:text-2xl">VENCIMENTO</span>
-  <span className="w-24 text-[11px] md:text-lg lg:text-2xl  ">PARCELAS</span>
-  <span className="w-32 text-[11px] md:text-lg lg:text-2xl text-center">VALOR</span>
-  
-</div>
-
+          <span className="w-32 text-[11px] md:text-lg lg:text-2xl">NOME</span>
+          <span className="w-32 text-[11px] md:text-lg lg:text-2xl">VENCIMENTO</span>
+          <span className="w-24 text-[11px] md:text-lg lg:text-2xl  ">PARCELAS</span>
+          <span className="w-32 text-[11px] md:text-lg lg:text-2xl text-center">VALOR</span>
+        </div>
 
         {/* Linhas da tabela */}
-       {contasFiltradas.map((conta) => {
-  const status = getStatus(conta);
-  const valorParcela = calcularParcela(conta.valor, conta.parcelas);
+        {contasFiltradas.map((conta) => {
+          const valorParcela = calcularParcela(conta.valor, conta.parcelas);
 
-  const rowClass =
-    status === "pago"
-      ? "bg-green-600 text-white"
-      : status === "vencida"
-      ? "bg-red-600 text-white"
-      : status === "quase"
-      ? "bg-yellow-300 text-black"
-      : "bg-primaria text-black";
-
-  return (
-    <div
-  key={conta.id}
-  onClick={() => setContaParaDeletar(conta.id)}
-  className={`font-zalando flex items-center justify-between px-3 py-3 mt-2 
+          return (
+            <div
+              key={conta.id}
+              onClick={() => handleClickLinha(conta)}
+              className={`font-zalando flex items-center justify-between px-3 py-3 mt-2 
   rounded-xl mx-1 transition-all ${
     conta.status === "pago"
       ? "bg-green-600 text-white"
@@ -444,34 +621,26 @@ export default function MinhasContas() {
       : getStatus(conta) === "quase"
       ? "bg-yellow-300 text-black"
       : "bg-primaria text-black"
-  } ${
-    contaParaDeletar === conta.id ? "ring-4 ring-yellow-400" : ""
-  }`}
->
-  <span className="w-32 text-xs md:text-lg lg:text-xl">{conta.nome}</span>
+  } ${contaParaDeletar === conta.id ? "ring-4 ring-yellow-400" : ""}`}
+            >
+              <span className="w-32 text-xs md:text-lg lg:text-xl">{conta.nome}</span>
 
-  <span className="w-32 text-xs md:text-lg lg:text-xl">
-    {formatarDataBR(conta.vencimento)}
-  </span>
+              <span className="w-32 text-xs md:text-lg lg:text-xl">
+                {formatarDataBR(conta.vencimento)}
+              </span>
 
- <span className="w-24 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
-  {conta.parcelas ? `${conta.parcelas}x` : "-"}
-</span>
+              <span className="w-24 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
+                {conta.parcelas ? `${conta.parcelas}x` : "-"}
+              </span>
 
-<span className="w-44 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
-  {conta.parcelas && calcularParcela(conta.valor, conta.parcelas)
-    ? `${formatMoney(calcularParcela(conta.valor, conta.parcelas))} x ${conta.parcelas}`
-    : formatMoney(conta.valor)}
-</span>
-
-
-    
-
-    
-    </div>
-  );
-})}
-
+              <span className="w-44 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
+                {conta.parcelas && calcularParcela(conta.valor, conta.parcelas)
+                  ? `${formatMoney(calcularParcela(conta.valor, conta.parcelas))} x ${conta.parcelas}`
+                  : formatMoney(conta.valor)}
+              </span>
+            </div>
+          );
+        })}
 
         {/* Inputs para adicionar nova conta */}
         <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row gap-3 mt-6">
@@ -511,86 +680,153 @@ export default function MinhasContas() {
           />
         </div>
 
-<div className="flex flex-col md:flex-row gap-3 mt-5">
-  
-  {/* Adicionar */}
-  <button
-    onClick={handleAddConta}
-    disabled={modoDeletar}
-    className={`${modoDeletar ? "bg-gray-400" : "bg-primaria hover:bg-yellow-300"} 
+        <div className="flex flex-col md:flex-row gap-3 mt-5">
+          {/* Adicionar */}
+          <button
+            onClick={handleAddConta}
+            disabled={modoDeletar}
+            className={`${modoDeletar ? "bg-gray-400" : "bg-primaria hover:bg-yellow-300"} 
       text-white p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
-  >
-    <FaPlus className="mr-2" />
-    Adicionar
-  </button>
+          >
+            <FaPlus className="mr-2" />
+            Adicionar
+          </button>
 
-  {/* Deletar linha */}
-  {!modoDeletar ? (
-    <button
-      onClick={ativarModoDeletar}
-      className="bg-vermelho text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-red-500 transition flex-1"
-    >
-      <FaTrash className="mr-2" />
-      Deletar Linha
-    </button>
-  ) : (
-    <div className="flex gap-3 flex-1">
-      <button
-        onClick={confirmarDelecao}
-        disabled={!contaParaDeletar}
-        className={`${!contaParaDeletar ? "bg-gray-400" : "bg-vermelho hover:bg-red-500"} 
+          {/* Deletar linha */}
+          {!modoDeletar ? (
+            <button
+              onClick={ativarModoDeletar}
+              className="bg-vermelho text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-red-500 transition flex-1"
+            >
+              <FaTrash className="mr-2" />
+              Deletar Linha
+            </button>
+          ) : (
+            <div className="flex gap-3 flex-1">
+              <button
+                onClick={confirmarDelecao}
+                disabled={!contaParaDeletar}
+                className={`${!contaParaDeletar ? "bg-gray-400" : "bg-vermelho hover:bg-red-500"} 
         text-black p-3 rounded-xl flex items-center justify-center transition flex-1 font-zalando`}
-      >
-        Confirmar Deleção
-      </button>
+              >
+                Confirmar Deleção
+              </button>
 
-      <button
-        onClick={() => {
-          setModoDeletar(false);
-          setContaParaDeletar(null);
-        }}
-        className="bg-gray-500 text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-gray-600 transition flex-1"
-      >
-        Cancelar
-      </button>
-    </div>
-  )}
+              <button
+                onClick={() => {
+                  setModoDeletar(false);
+                  setContaParaDeletar(null);
+                }}
+                className="bg-gray-500 text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-gray-600 transition flex-1"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
 
-  {/* BOTÃO PAGAR / DESMARCAR */}
-  {contaParaDeletar && !modoDeletar && (
-    <button
-      onClick={() => togglePago(contas.find(c => c.id === contaParaDeletar))}
-      className={`${
-        contas.find(c => c.id === contaParaDeletar).status === "pago"
-          ? "bg-red-700 hover:bg-red-800"
-          : "bg-green-600 hover:bg-green-700"
-      } 
+          {/* BOTÃO PAGAR / DESMARCAR (aparece quando há uma conta selecionada e não estamos no modo deletar) */}
+          {contaParaDeletar && !modoDeletar && (
+            <button
+              onClick={handleAbrirPagamentoSelecionada}
+              className={`${
+                (contas.find(c => c.id === contaParaDeletar) || {}).status === "pago"
+                  ? "bg-red-700 hover:bg-red-800"
+                  : "bg-green-600 hover:bg-green-700"
+              } 
       text-white font-zalando p-3 rounded-xl flex items-center justify-center transition flex-1`}
-    >
-      {contas.find(c => c.id === contaParaDeletar).status === "pago"
-        ? "Desmarcar Pago"
-        : "Marcar como Pago"}
-    </button>
-  )}
-
-</div>
-
-
-
-      <div className="mt-6 flex gap-4 items-center justify-center font-zalando text-sm">
-        <div className="flex items-center gap-2">
-          <p className="h-3 w-3 rounded-full bg-red-600"></p>
-        <p>Atrasada</p>
+            >
+              {(contas.find(c => c.id === contaParaDeletar) || {}).status === "pago"
+                ? "Desmarcar Pago"
+                : "Marcar como Pago"}
+            </button>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <p className="h-3 w-3 rounded-full bg-yellow-600"></p>
-        <p>Pendente</p>
+
+        {/* Histórico de pagamentos (Contas Pagas) */}
+        <h2 className="mt-10 text-xl font-zalando text-center">Histórico de Pagamentos</h2>
+
+        <div className="bg-black bg-opacity-10 p-4 rounded-xl mt-4">
+          {pagamentos.length === 0 ? (
+            <p className="text-center text-gray-300 font-zalando">Nenhum pagamento registrado ainda</p>
+          ) : (
+            pagamentos.map((p) => {
+              const contaOriginal = contas.find(c => c.id === p.conta_id);
+
+              const selected = pagamentoSelecionadoId === p.id;
+              return (
+                <div
+                  key={p.id}
+                  onClick={() => {
+                    // selecionar pagamento para cancelar
+                    setPagamentoSelecionadoId(selected ? null : p.id);
+                    // também atualizar o objeto que será usado no modal
+                    setPagamentoParaCancelar(selected ? null : p);
+                  }}
+                  className={`font-zalando flex items-center justify-between px-3 py-3 mt-2 
+                  rounded-xl mx-1 transition-all ${selected ? "ring-4 ring-yellow-400 bg-primaria text-black" : "bg-primaria text-black"}`}
+                  style={{ cursor: "pointer" }}
+                >
+                  {/* NOME */}
+                  <span className="w-32 text-xs md:text-lg lg:text-xl">
+                    {contaOriginal?.nome || "Conta"}
+                  </span>
+
+                  {/* DATA */}
+                  <span className="w-32 text-xs md:text-lg lg:text-xl">
+                    {formatarDataBR(p.pago_em)}
+                  </span>
+
+                  {/* PARCELAS */}
+                  <span className="w-24 text-xs md:text-lg lg:text-xl text-center">
+                    {p.parcelas_pagas}x
+                  </span>
+
+                  {/* VALOR */}
+                  <span className="w-32 text-xs md:text-lg lg:text-xl text-center">
+                    {formatMoney(p.valor_pago)}
+                  </span>
+                </div>
+              );
+            })
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <p className="h-3 w-3 rounded-full bg-green-600"></p>
-        <p>Pago</p>
+
+        {/* BOTÃO '↩ Cancelar Pagamento' - embaixo do histórico */}
+      
+        <div className="mt-4 flex justify-center  ">
+          <button
+            onClick={abrirModalCancelarSelecionado}
+            disabled={!pagamentoSelecionadoId}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-zalando ${
+              pagamentoSelecionadoId ? "bg-red-700 hover:bg-red-800 text-white" : "bg-gray-500 text-white cursor-not-allowed"
+            }`}
+          >
+            <span >
+              <TbCancel />
+            </span>
+            Cancelar Pagamento
+          </button>
+           
         </div>
-      </div>
+          <div className=" items-center flex justify-center">
+         <p className="font-zalando text-xs mt-2 text-white/40">Para cancelar selecione a conta</p>
+         </div>
+
+
+        <div className="mt-6 flex gap-4 items-center justify-center font-zalando text-sm">
+          <div className="flex items-center gap-2">
+            <p className="h-3 w-3 rounded-full bg-red-600"></p>
+            <p>Atrasada</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="h-3 w-3 rounded-full bg-yellow-600"></p>
+            <p>Pendente</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="h-3 w-3 rounded-full bg-green-600"></p>
+            <p>Pago</p>
+          </div>
+        </div>
 
         {/* Mensagem modo deletar */}
         {modoDeletar && (
@@ -600,6 +836,95 @@ export default function MinhasContas() {
             </p>
           </div>
         )}
+
+        {/* MODAL PAGAMENTO (registrar pagamento parcial/total) */}
+        {mostrarModalPagamento && contaParaPagar && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+            <div className="bg-white text-black p-6 rounded-xl max-w-sm w-full font-zalando">
+              <h2 className="text-xl font-bold mb-4 text-center font-zalando">Quantas parcelas você pagou?</h2>
+
+              <p className="mb-2 text-center">Conta: <strong>{contaParaPagar.nome}</strong></p>
+              <p className="mb-2 text-center">Parcelas restantes: {contaParaPagar.parcelas || 1}</p>
+
+              <select
+                value={parcelasPagas}
+                onChange={(e) => setParcelasPagas(Number(e.target.value))}
+                className="w-full p-3 border rounded-xl mb-4"
+              >
+                {Array.from({ length: Math.max(Number(contaParaPagar.parcelas || 1), 1) }, (_, i) => i + 1)
+                  .map(n => (
+                    <option key={n} value={n}>
+                      {n} {n === 1 ? "parcela" : "parcelas"}
+                    </option>
+                  ))}
+              </select>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={confirmarPagamento}
+                  className="bg-secundaria hover:bg-green-900 text-white p-3 rounded-xl flex-1"
+                >
+                  Confirmar
+                </button>
+
+                <button
+                  onClick={() => { setMostrarModalPagamento(false); setContaParaPagar(null); }}
+                  className="bg-red-600 hover:bg-red-800 text-white p-3 rounded-xl flex-1"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL CANCELAR (desfazer parcelas pagas) */}
+        {mostrarModalCancelar && pagamentoParaCancelar && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+            <div className="bg-white text-black p-6 rounded-xl max-w-sm w-full font-zalando">
+              <h2 className="text-xl font-bold mb-4 text-center">Cancelar pagamento</h2>
+
+              <p className="mb-2 text-center">
+                Conta: <strong>{contas.find(c => c.id === pagamentoParaCancelar.conta_id)?.nome || "Conta"}</strong>
+              </p>
+
+              <p className="mb-2 text-center">
+                Pagou: {pagamentoParaCancelar.parcelas_pagas} {pagamentoParaCancelar.parcelas_pagas === 1 ? "parcela" : "parcelas"}
+              </p>
+
+              <select
+                value={parcelasCancelar}
+                onChange={(e) => setParcelasCancelar(Number(e.target.value))}
+                className="w-full p-3 border rounded-xl mb-4"
+              >
+                {Array.from({ length: pagamentoParaCancelar.parcelas_pagas }, (_, i) => i + 1)
+                  .map(n => (
+                    <option key={n} value={n}>
+                      Desfazer {n} {n === 1 ? "parcela" : "parcelas"}
+                    </option>
+                  ))}
+              </select>
+
+              <div className="flex gap-3 items-center justify-center">
+                <button
+                  onClick={cancelarPagamento}
+                  className="bg-red-700 text-white p-3 rounded-xl flex-1"
+                >
+                  Confirmar
+                </button>
+
+                <button
+                  onClick={() => { setMostrarModalCancelar(false); setPagamentoParaCancelar(null); setPagamentoSelecionadoId(null); }}
+                  className="bg-gray-500 text-white p-3 rounded-xl flex-1"
+                >
+                  Fechar
+                </button>
+              
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
