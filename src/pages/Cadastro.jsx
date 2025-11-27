@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { MdEmail } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaUserAlt, FaPhone } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
+import { Link, useNavigate } from "react-router-dom";
 
-import { Link } from "react-router-dom";
 
 
 const Cadastro = () => {
