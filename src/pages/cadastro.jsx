@@ -4,7 +4,7 @@ import { FaEye, FaEyeSlash, FaUserAlt, FaPhone } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 
-const Cadastro = () => {
+const cadastro = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -277,4 +277,4 @@ const PasswordField = ({
   </div>
 );  
 
-export default Cadastro;
+export default cadastro;
