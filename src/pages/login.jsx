@@ -196,9 +196,10 @@ const Login = () => {
 
             <div className="text-center font-zalando text-secundaria text-sm mt-2">
               Não tem conta ?{" "}
-              <a href="/Cadastro" className="text-primaria font-semibold hover:underline">
-                Cadastre-se
-              </a>
+             <Link to="/Cadastro" className="text-primaria font-semibold hover:underline">
+  Cadastre-se
+</Link>
+
             </div>
 
           </form>
