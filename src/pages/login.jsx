@@ -5,6 +5,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { supabase } from "../lib/supabaseClient";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // ⬅ IMPORTANTE
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate(); // ⬅ Agora usamos navegação react-router
@@ -195,7 +196,7 @@ const Login = () => {
 
             <div className="text-center font-zalando text-secundaria text-sm mt-2">
               Não tem conta ?{" "}
-              <a href="/cadastro" className="text-primaria font-semibold hover:underline">
+              <a href="/Cadastro" className="text-primaria font-semibold hover:underline">
                 Cadastre-se
               </a>
             </div>
