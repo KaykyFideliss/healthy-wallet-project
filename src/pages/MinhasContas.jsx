@@ -518,6 +518,7 @@ export default function MinhasContas() {
           </div>
         )}
 
+
         {tabelas.length > 0 && (
           <div className="mt-16 w-full max-w-2xl md:max-w-5xl">
             <h2 className="text-4xl md:text-5xl font-semibold font-zalando text-center mb-16">Suas Tabelas</h2>
@@ -542,11 +543,18 @@ export default function MinhasContas() {
                   </p>
                 </div>
               ))}
+
+
+ 
+
             </div>
           </div>
+          
         )}
       </div>
+      
     );
+    
   }
 
   // TELA DA TABELA (detalhes)
@@ -827,6 +835,8 @@ export default function MinhasContas() {
             <p>Pago</p>
           </div>
         </div>
+
+        
 
         {/* Mensagem modo deletar */}
         {modoDeletar && (

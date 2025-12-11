@@ -27,7 +27,9 @@ const Navbar = () => {
     ? [
         { name: "Home", path: "/" },
         { name: "Minhas Contas", path: "/MinhasContas" },
+        { name: "Dashboard", path: "/Dashboard" },
         { name: "Settings", path: "/Settings" },
+
       ]
     : [
         { name: "Home", path: "/" },

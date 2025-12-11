@@ -7,6 +7,9 @@ import UserSetup from "./pages/UserSetup";
 import MinhasContas from "./pages/MinhasContas";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import UserSettings from "./pages/UserSettings";
+import Dashboard from "./pages/Dashboard";
+import TabelaDashboard from "./pages/TabelaDashboard";
+
 
 // 🔐 Rota protegida
 const ProtectedRoute = ({ children }) => {
@@ -34,6 +37,8 @@ function App() {
         <Route path="/Login" element={<Login />} />
         <Route path="/Cadastro" element={<Cadastro />} />
 
+  <Route path="/dashboard" element={<Dashboard />} />
+  <Route path="/tabela/:id" element={<TabelaDashboard />} />
         {/* Páginas que exigem login */}
         <Route
           path="/UserSetup"
@@ -59,6 +64,18 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+<Route
+  path="/dashboard"
+  element={
+    <ProtectedRoute>
+    
+    </ProtectedRoute>
+  }
+/>
+
+
+
 
         {/* Redirecionamento para rota padrão */}
         <Route path="*" element={<Navigate to="/" />} />
