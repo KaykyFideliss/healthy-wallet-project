@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { FaChevronRight } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const COLORS = ["#04BF8A", "#FFCC28", "#FF6B6B"];
 
@@ -145,9 +146,12 @@ export default function Dashboard() {
 
 
             <div className="mt-4 flex gap-2 text-center flex-col">
-              <a href={`/tabela/${t.id}`} className=" font-zalando  text-white hover:text-secundaria px-3 py-2 flex items-center gap-2 text-base justify-center bg-secundaria rounded hover:bg-white transition">
+              <Link
+                to={`/tabela/${t.id}`}
+                className="font-zalando text-white hover:text-secundaria px-3 py-2 flex items-center gap-2 text-base justify-center bg-secundaria rounded hover:bg-white transition"
+              >
                 Abrir Dashboard <FaChevronRight />
-              </a>
+              </Link>
             </div>
             <div className="mt-2 text-xs mx-4 flex justify-between items-center text-center flex-col-2">
               <div className=" text-white font-zalando">Data de criação</div>
