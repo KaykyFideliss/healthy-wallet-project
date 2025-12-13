@@ -59,24 +59,38 @@ export default function MinhasContas() {
   }, [tabelaAtual]);
 
   // ---------- Helpers ----------
-  const formatarDataBR = (iso) => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return iso;
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+const formatarDataBR = (iso) => {
+  if (!iso) return "";
+  const d = parseDateAsUTC(iso);
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const year = d.getUTCFullYear();
+  return `${day}/${month}/${year}`;
+};
 
-  const isPastDate = (isoDate) => {
-    if (!isoDate) return false;
-    const hoje = new Date();
-    hoje.setHours(0,0,0,0);
-    const venc = new Date(isoDate);
-    venc.setHours(0,0,0,0);
-    return venc < hoje;
-  };
+
+  const parseDateAsUTC = (dateStr) => {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+};
+
+
+ const isPastDate = (isoDate) => {
+  if (!isoDate) return false;
+
+  const venc = parseDateAsUTC(isoDate);
+
+  const hoje = new Date();
+  const hojeUTC = new Date(Date.UTC(
+    hoje.getFullYear(),
+    hoje.getMonth(),
+    hoje.getDate()
+  ));
+
+  return venc < hojeUTC;
+};
+
 
   const calcularParcela = (valor, parcelas) => {
     const v = Number(valor);
@@ -249,24 +263,47 @@ export default function MinhasContas() {
     }
   };
 
-  const handleDeleteConta = async (contaId) => {
-    if (!window.confirm("Deseja realmente deletar esta conta?")) return;
-    try {
-      const { error } = await supabase
-        .from("contas")
-        .delete()
-        .eq("id", contaId);
+ const handleDeleteConta = async (contaId) => {
+  if (!window.confirm("Deseja realmente deletar esta conta?")) return;
 
-      if (error) throw error;
+  try {
+    // 1. Deletar pagamentos vinculados à conta
+    const { error: erroPagamentos } = await supabase
+      .from("pagamentos")
+      .delete()
+      .eq("conta_id", contaId);
 
-      setContas((prev) => prev.filter((c) => c.id !== contaId));
-      await loadTabelas();
-      await loadPagamentos();
-    } catch (err) {
-      console.error("Erro deletar conta:", err);
-      alert("Erro ao deletar conta");
+    if (erroPagamentos) {
+      console.error("Erro ao deletar pagamentos:", erroPagamentos);
+      alert("Erro ao remover pagamentos da conta.");
+      return;
     }
-  };
+
+    // 2. Deletar a conta
+    const { error: erroConta } = await supabase
+      .from("contas")
+      .delete()
+      .eq("id", contaId);
+
+    if (erroConta) {
+      console.error("Erro ao deletar conta:", erroConta);
+      alert("Erro ao remover a conta.");
+      return;
+    }
+
+    // 3. Remover do estado local
+    setContas((prev) => prev.filter((c) => c.id !== contaId));
+
+    // 4. Atualizar tabelas e pagamentos (importante para o Dashboard)
+    await loadTabelas();
+    await loadPagamentos();
+
+  } catch (err) {
+    console.error("Erro deletar conta:", err);
+    alert("Erro inesperado ao deletar conta.");
+  }
+};
+
 
   // marcar linha para deletar (agora também seleciona para ações)
   const ativarModoDeletar = () => {
@@ -286,32 +323,44 @@ export default function MinhasContas() {
     setContaParaDeletar(null);
   };
 
-  const getStatus = (conta) => {
-    if (!conta) return "ok";
-    if (conta.status === "pago") return "pago";
-    if (!conta.vencimento) return "ok";
-    const hoje = new Date();
-    hoje.setHours(0,0,0,0);
-    const venc = new Date(conta.vencimento);
-    venc.setHours(0,0,0,0);
-    const diffMs = venc - hoje;
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays < 0) return "vencida";
-    if (diffDays <= 3) return "quase";
-    return "ok";
-  };
+const getStatus = (conta) => {
+  if (!conta) return "ok";
+  if (conta.status === "pago") return "pago";
+  if (!conta.vencimento) return "ok";
 
-  const contasFiltradas = contas
-    .filter((c) => {
-      if (filtro === "all") return true;
-      if (filtro === "pagas") return c.status === "pago";
-      const status = getStatus(c);
-      if (filtro === "vencidas") return status === "vencida";
-      if (filtro === "quase") return status === "quase";
-      if (filtro === "ok") return status === "ok";
-      return true;
-    })
-    .sort((a,b) => new Date(a.vencimento) - new Date(b.vencimento));
+  const venc = parseDateAsUTC(conta.vencimento);
+
+  const hoje = new Date();
+  const hojeUTC = new Date(Date.UTC(
+    hoje.getFullYear(),
+    hoje.getMonth(),
+    hoje.getDate()
+  ));
+
+  const diffDays = Math.floor((venc - hojeUTC) / 86400000);
+
+  if (diffDays < 0) return "vencida";
+  if (diffDays <= 3) return "quase";
+  return "ok";
+};
+
+
+const contasFiltradas = contas
+  .filter((c) => {
+    if (filtro === "all") return true;
+    if (filtro === "pagas") return c.status === "pago";
+    const status = getStatus(c);
+    if (filtro === "vencidas") return status === "vencida";
+    if (filtro === "quase") return status === "quase";
+    if (filtro === "ok") return status === "ok";
+    return true;
+  })
+  .sort((a, b) => {
+    const da = parseDateAsUTC(a.vencimento);
+    const db = parseDateAsUTC(b.vencimento);
+    return da - db;
+  });
+
 
   // abrir modal de pagamento (escolher quantas parcelas)
   const abrirModalPagamento = (conta) => {

@@ -57,11 +57,9 @@ export default function TabelaDashboard() {
     }
   }
 
-  const calcContaTotal = (conta) => {
-    const v = Number(conta.valor || 0);
-    const p = conta.parcelas ? Number(conta.parcelas) : 1;
-    return v * (p || 1);
-  };
+const calcContaTotal = (conta) => {
+  return Number(conta.valor || 0);
+};
 
   const metrics = useMemo(() => {
     const totalGeral = contas.reduce((s, c) => s + calcContaTotal(c), 0);
