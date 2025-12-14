@@ -14,6 +14,11 @@ export default function Dashboard() {
   const [allPagamentos, setAllPagamentos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+const COLORS_BY_STATUS = {
+  Pago: "#04BF8A",     // verde
+  Pendente: "#FFCC28", // amarelo
+  Vencendo: "#FF6B6B",  // vermelho
+};
 
   useEffect(() => {
     if (!user) return;
@@ -91,10 +96,13 @@ export default function Dashboard() {
       const contasCount = contasDaTabela.length;
 
       // pie data: pago vs pendente
-      const pie = [
-        { name: "Pago", value: totalPago },
-        { name: "Pendente", value: debito }
-      ];
+const pie = [
+  { name: "Pago", value: totalPago },
+  { name: "Pendente", value: debito },
+  { name: "Vencendo", value: contasVencer },
+];
+
+
 
       return {
         ...t,
@@ -128,16 +136,28 @@ export default function Dashboard() {
                 <h3 className="font-zalando font-bold text-lg"  >{t.nome}</h3>
                 <p className="text-xs text-secundaria font-zalando">{t.contasCount} conta(s)</p>
               </div>
+<div style={{ width: 80, height: 80 }}>
+  <ResponsiveContainer width="100%" height="100%">
+    <PieChart>
+      <Pie
+        data={t.pie}
+        dataKey="value"
+        nameKey="name"
+        innerRadius={18}
+        outerRadius={30}
+      >
+        {t.pie.map((entry, i) => (
+          <Cell
+            key={i}
+            fill={COLORS_BY_STATUS[entry.name] || "#ccc"}
+          />
+        ))}
+      </Pie>
+    </PieChart>
+  </ResponsiveContainer>
+</div>
 
-              <div style={{ width: 80, height: 80 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={t.pie} dataKey="value" nameKey="name" innerRadius={18} outerRadius={30} paddingAngle={2}>
-                      {t.pie.map((entry, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+
             </div>
 
             <div>
