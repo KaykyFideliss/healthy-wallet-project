@@ -505,7 +505,7 @@ export default function TabelaDashboard() {
     <div className="p-4 md:p-6 mt-0 md:mt-6 lg:mt-8">
       {/* Botão voltar */}
       <button 
-        className="bg-secundaria font-zalando flex items-center justify-center text-center text-white px-4 py-2 rounded-lg mb-6 hover:bg-opacity-90 transition"
+        className="bg-secundaria font-zalando flex items-center mt-7 justify-center text-center text-white px-4 py-2 rounded-lg mb-6 hover:bg-opacity-90 transition"
         onClick={() => navigate("/dashboard")}
       >
         <FaArrowLeft className="mr-2" />
@@ -593,18 +593,18 @@ export default function TabelaDashboard() {
             </div>
 
             {/* Gráfico de Barras */}
-            <div className=" p-4 rounded-lg font-zalando col-span-2">
+            <div className=" rounded-lg font-zalando col-span-2">
               <h3 className="font-semibold  text-white font-zalando text-base mb-4 text-center">
                 OS 10 MAIORES GASTOS
               </h3>
               
               {barData.length > 0 ? (
-                <div style={{ width: "100%", height: 300 }}>
+                <div  style={{ width: "100%", height: 300 }}>
                   <ResponsiveContainer>
                     <BarChart
                       data={barData}
                       layout="vertical"
-                      margin={{ top: 10, right: 20, left: -30, bottom: 10 }}
+                      margin={{ top: 10, right: 30, left: -50, bottom: 10 }}
                     >
                       <YAxis
                         type="category"
@@ -654,13 +654,14 @@ export default function TabelaDashboard() {
 
           {/* MÉTRICAS DO SALÁRIO */}
           {salaryMetrics && (
-            <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 font-zalando ">
               {[
                 { 
                   label: "Salário", 
                   value: salary, 
                   color: "text-terciaria",
                   description: "Renda mensal"
+                 
                 },
                 { 
                   label: "Comprometido", 
@@ -672,7 +673,7 @@ export default function TabelaDashboard() {
                   label: "Saldo Livre", 
                   value: salaryMetrics.saldoLivre, 
                   color: salaryMetrics.saldoLivre < 0 ? "text-red-500" : "text-green-500",
-                  description: salaryMetrics.saldoLivre < 0 ? "Negativo" : "Disponível"
+                  description: salaryMetrics.saldoLivre < 0 ? "Negativo" : "Disponível para uso"
                 },
                 { 
                   label: "Limite Diário", 
@@ -682,15 +683,15 @@ export default function TabelaDashboard() {
                 },
               ].map((item, idx) => (
                 <div key={idx} className="bg-primaria p-4 rounded-lg">
-                  <div className="text-sm text-gray-300 font-zalando font-semibold">
+                  <div className="text-lg text-white font-zalando font-semibold">
                     {item.label}
                   </div>
-                  <div className={`text-xl font-bold font-zalando mt-1 ${item.color}`}>
+                  <div className={`text-base font-bold font-zalando mt-1 ${item.color}`}>
                     {typeof item.value === 'number' 
                       ? formatCurrency(item.value)
                       : item.value}
                   </div>
-                  <div className="text-xs text-gray-400 mt-1">
+                  <div className="text-sm font-semibold text-white mt-1">
                     {item.description}
                   </div>
                 </div>
@@ -698,291 +699,203 @@ export default function TabelaDashboard() {
             </section>
           )}
 
-          {/* COMPARAÇÃO MENSAL */}
-          {monthlyComparison && (
-            <section className="mb-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-white font-zalando flex items-center">
-                    <FaChartLine className="mr-3 text-terciaria" />
-                    Comparativo Mensal
-                  </h2>
-                  <span className="text-sm text-gray-300">
-                    {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-                  </span>
-                </div>
+{/* COMPARAÇÃO MENSAL - SEMPRE VISÍVEL */}
 
-                {/* CARDS DE COMPARAÇÃO */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  {[
-                    {
-                      title: "Gastos Totais",
-                      atual: monthlyComparison.atual.total_gasto,
-                      anterior: monthlyComparison.anterior.total_gasto,
-                      diff: monthlyComparison.diffGasto,
-                      percent: monthlyComparison.percentGasto,
-                      melhorou: monthlyComparison.melhorouGasto,
-                      icon: <FaMoneyBillWave />,
-                    },
-                    {
-                      title: "Valor Pago",
-                      atual: monthlyComparison.atual.total_pago,
-                      anterior: monthlyComparison.anterior.total_pago,
-                      diff: monthlyComparison.diffPago,
-                      percent: monthlyComparison.percentPago,
-                      melhorou: monthlyComparison.melhorouPago,
-                      icon: <FaChartLine />,
-                    },
-                    {
-                      title: "Pendências",
-                      atual: monthlyComparison.atual.total_pendente,
-                      anterior: monthlyComparison.anterior.total_pendente,
-                      diff: monthlyComparison.diffPendente,
-                      percent: monthlyComparison.percentPendente,
-                      melhorou: monthlyComparison.melhorouPendente,
-                      icon: <FaExclamationTriangle />,
-                    },
-                  ].map((item, idx) => (
-                    <div key={idx} className="bg-primaria p-4 rounded-lg">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-white font-semibold font-zalando">{item.title}</h3>
-                        <div className={`p-2 rounded-full ${item.melhorou ? 'bg-green-900/30' : 'bg-red-900/30'}`}>
-                          <div className={`${item.melhorou ? 'text-green-400' : 'text-red-400'}`}>
-                            {item.icon}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-between items-end mb-2">
-                        <div>
-                          <div className="text-2xl font-bold text-white">
-                            {formatCurrency(item.atual)}
-                          </div>
-                          <div className="text-sm text-gray-400">
-                            Mês atual
-                          </div>
-                        </div>
-                        
-                        <div className="text-right">
-                          <div className={`flex items-center justify-end ${item.melhorou ? 'text-green-400' : 'text-red-400'}`}>
-                            {item.melhorou ? <FaArrowDown className="mr-1" /> : <FaArrowUp className="mr-1" />}
-                            <span className="font-bold">{formatPercent(item.percent)}</span>
-                          </div>
-                          <div className="text-sm text-gray-400">
-                            vs mês anterior
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="text-xs text-gray-500">
-                        Mês anterior: {formatCurrency(item.anterior)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
-                {/* GRÁFICO DE COMPARAÇÃO */}
-                {comparisonChartData.length > 0 && (
-                  <div className="bg-primaria p-4 rounded-lg mb-6">
-                    <h3 className="text-white font-semibold mb-4 font-zalando">Comparação Visual</h3>
-                    <div style={{ width: '100%', height: 250 }}>
-                      <ResponsiveContainer>
-                        <BarChart data={comparisonChartData}>
-                          <XAxis 
-                            dataKey="name" 
-                            tick={{ fill: '#fff' }}
-                            axisLine={{ stroke: '#fff' }}
-                          />
-                          <YAxis 
-                            tick={{ fill: '#fff' }}
-                            tickFormatter={(v) => formatCurrency(v).replace('R$', '')}
-                            axisLine={{ stroke: '#fff' }}
-                          />
-                          <Tooltip
-                            formatter={(value) => [formatCurrency(value), 'Valor']}
-                          />
-                          <Bar 
-                            dataKey="anterior" 
-                            name="Mês Anterior" 
-                            fill="#4B5563" 
-                            radius={[4, 4, 0, 0]}
-                          />
-                          <Bar 
-                            dataKey="atual" 
-                            name="Mês Atual" 
-                            fill="#ffcc00" 
-                            radius={[4, 4, 0, 0]}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                )}
+{/* GRÁFICO DE EVOLUÇÃO - SEMPRE VISÍVEL 
+<section className="mb-8">
+  <div className="bg-primaria p-4 rounded-lg">
+    <h3 className="text-white font-semibold mb-4 font-zalando">
+      Evolução dos Gastos
+    </h3>
+    
+    {evolutionChartData.length > 0 ? (
+      <>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <AreaChart data={evolutionChartData}>
+              <XAxis 
+                dataKey="name" 
+                tick={{ fill: '#fff' }}
+                axisLine={{ stroke: '#fff' }}
+              />
+              <YAxis 
+                tick={{ fill: '#fff' }}
+                tickFormatter={(v) => formatCurrency(v).replace('R$', '')}
+                axisLine={{ stroke: '#fff' }}
+              />
+              <Tooltip
+                formatter={(value) => [formatCurrency(value), 'Valor']}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="gasto" 
+                name="Gastos" 
+                stroke="#ffcc00" 
+                fill="#ffcc00" 
+                fillOpacity={0.3}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="pago" 
+                name="Pago" 
+                stroke="#03664E" 
+                fill="#03664E" 
+                fillOpacity={0.3}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="percentual" 
+                name="% do Salário" 
+                stroke="#8B5CF6" 
+                strokeWidth={2}
+                dot={{ r: 3 }}
+                yAxisId="right"
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                tick={{ fill: '#fff' }}
+                tickFormatter={(v) => `${v.toFixed(0)}%`}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="flex justify-center gap-6 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-1 bg-[#ffcc00]"></div>
+            <span className="text-white text-xs">Gastos</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-1 bg-[#03664E]"></div>
+            <span className="text-white text-xs">Pago</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-1 bg-[#8B5CF6]"></div>
+            <span className="text-white text-xs">% Salário</span>
+          </div>
+        </div>
+        
+        <div className="mt-4 text-center">
+          <p className="text-gray-300 text-sm">
+            Mostrando dados dos últimos {evolutionChartData.length} meses
+          </p>
+        </div>
+      </>
+    ) : (
+      
+      <div className="py-8 text-center">
+        <div className="text-4xl mb-3">📈</div>
+        <h4 className="text-white font-zalando text-lg mb-2">
+          Histórico de Evolução
+        </h4>
+        <p className="text-gray-300 mb-4">
+          O histórico começará a ser registrado automaticamente
+        </p>
+        
+        <div className="inline-grid grid-cols-3 gap-2 mb-4">
+          <div className="bg-gray-800/50 p-2 rounded text-center">
+            <p className="text-xs text-gray-400">Snapshots</p>
+            <p className="text-white font-bold">{snapshots.length}</p>
+          </div>
+          <div className="bg-gray-800/50 p-2 rounded text-center">
+            <p className="text-xs text-gray-400">Contas</p>
+            <p className="text-white font-bold">{contas.length}</p>
+          </div>
+          <div className="bg-gray-800/50 p-2 rounded text-center">
+            <p className="text-xs text-gray-400">Mês</p>
+            <p className="text-white font-bold">{new Date().getMonth() + 1}</p>
+          </div>
+        </div>
+        
+        <div className="text-left max-w-md mx-auto bg-gray-800/30 p-4 rounded">
+          <p className="text-gray-400 text-sm mb-2">Próximos passos:</p>
+          <ul className="text-gray-300 text-sm space-y-1">
+            <li className="flex items-center">
+              <span className="text-green-400 mr-2">✓</span>
+              Adicione contas na tabela
+            </li>
+            <li className="flex items-center">
+              <span className="text-green-400 mr-2">✓</span>
+              Configure seu salário no perfil
+            </li>
+            <li className="flex items-center">
+              <span className={pagamentos.length > 0 ? "text-green-400" : "text-yellow-400"}>{pagamentos.length > 0 ? "✓" : "○"}</span>
+              <span className="ml-2">Registre pagamentos ({pagamentos.length} registrados)</span>
+            </li>
+            <li className="flex items-center">
+              <span className={snapshots.length > 0 ? "text-green-400" : "text-yellow-400"}>{snapshots.length > 0 ? "✓" : "○"}</span>
+              <span className="ml-2">Aguarde o próximo mês para histórico ({snapshots.length} snapshots)</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+*/}
 
-                {/* INSIGHTS */}
-                {monthlyComparison.insights.length > 0 && (
-                  <div className="bg-primaria p-4 rounded-lg">
-                    <h3 className="text-white font-semibold mb-3 font-zalando flex items-center">
-                      <FaPiggyBank className="mr-2 text-terciaria" />
-                      Insights Financeiros
-                    </h3>
-                    <div className="space-y-2">
-                      {monthlyComparison.insights.map((insight, idx) => (
-                        <div key={idx} className="flex items-start p-3 bg-gray-800/50 rounded">
-                          <div className={`p-1 rounded-full mr-3 ${insight.includes('Cuidado') || insight.includes('Atenção') ? 'bg-red-900/30' : 'bg-green-900/30'}`}>
-                            {insight.includes('Cuidado') || insight.includes('Atenção') ? (
-                              <FaExclamationTriangle className="text-red-400" />
-                            ) : (
-                              <FaChartLine className="text-green-400" />
-                            )}
-                          </div>
-                          <p className="text-white text-sm">{insight}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            </section>
-          )}
+        {/* LISTA DE CONTAS */}
+<section className="mb-6">
+  <h3 className="font-semibold mb-4 text-white text-xl font-zalando">Contas</h3>
+  <div className="flex flex-col gap-3">
+    {contas.length > 0 ? contas.map(c => {
+      const vencimento = c.vencimento ? new Date(c.vencimento) : null;
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      
+      // Defina a classe CSS completa aqui
+      let statusBgColor = "bg-primaria";
+      let statusText = "Pendente";
+      
+      if (vencimento) {
+        vencimento.setHours(0, 0, 0, 0);
+        if (vencimento < hoje) {
+          statusBgColor = "bg-red-600";
+          statusText = "Atrasada";
+        } else if ((vencimento - hoje) / (1000 * 60 * 60 * 24) <= 7) {
+          statusBgColor = "bg-orange-500";
+          statusText = "Vencendo";
+        }
+      }
 
-          {/* GRÁFICO DE EVOLUÇÃO */}
-          {evolutionChartData.length > 0 && (
-            <section className="mb-8">
-              <div className="bg-primaria p-4 rounded-lg">
-                <h3 className="text-white font-semibold mb-4 font-zalando">
-                  Evolução dos Últimos {evolutionChartData.length} Meses
-                </h3>
-                <div style={{ width: '100%', height: 300 }}>
-                  <ResponsiveContainer>
-                    <AreaChart data={evolutionChartData}>
-                      <XAxis 
-                        dataKey="name" 
-                        tick={{ fill: '#fff' }}
-                        axisLine={{ stroke: '#fff' }}
-                      />
-                      <YAxis 
-                        tick={{ fill: '#fff' }}
-                        tickFormatter={(v) => formatCurrency(v).replace('R$', '')}
-                        axisLine={{ stroke: '#fff' }}
-                      />
-                      <Tooltip
-                        formatter={(value) => [formatCurrency(value), 'Valor']}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="gasto" 
-                        name="Gastos" 
-                        stroke="#ffcc00" 
-                        fill="#ffcc00" 
-                        fillOpacity={0.3}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="pago" 
-                        name="Pago" 
-                        stroke="#03664E" 
-                        fill="#03664E" 
-                        fillOpacity={0.3}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="percentual" 
-                        name="% do Salário" 
-                        stroke="#8B5CF6" 
-                        strokeWidth={2}
-                        dot={{ r: 3 }}
-                        yAxisId="right"
-                      />
-                      <YAxis 
-                        yAxisId="right"
-                        orientation="right"
-                        tick={{ fill: '#fff' }}
-                        tickFormatter={(v) => `${v.toFixed(0)}%`}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex justify-center gap-6 mt-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-1 bg-[#ffcc00]"></div>
-                    <span className="text-white text-xs">Gastos</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-1 bg-[#03664E]"></div>
-                    <span className="text-white text-xs">Pago</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-1 bg-[#8B5CF6]"></div>
-                    <span className="text-white text-xs">% Salário</span>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* LISTA DE CONTAS */}
-          <section className="mb-6">
-            <h3 className="font-semibold mb-4 text-white text-xl font-zalando">Contas</h3>
-            <div className="flex flex-col gap-3">
-              {contas.length > 0 ? contas.map(c => {
-                const vencimento = c.vencimento ? new Date(c.vencimento) : null;
-                const hoje = new Date();
-                hoje.setHours(0, 0, 0, 0);
-                
-                let statusColor = "bg-gray-700";
-                let statusText = "Pendente";
-                
-                if (vencimento) {
-                  vencimento.setHours(0, 0, 0, 0);
-                  if (vencimento < hoje) {
-                    statusColor = "bg-red-600";
-                    statusText = "Atrasada";
-                  } else if ((vencimento - hoje) / (1000 * 60 * 60 * 24) <= 7) {
-                    statusColor = "bg-orange-500";
-                    statusText = "Vencendo";
-                  }
-                }
-
-                return (
-                  <div key={c.id} className="bg-primaria p-4 rounded-lg flex justify-between items-center hover:bg-opacity-80 transition">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${statusColor}`}></div>
-                        <div className="font-medium text-white">{c.nome}</div>
-                        <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300">
-                          {statusText}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-300 mt-1">
-                        {vencimento ? vencimento.toLocaleDateString('pt-BR') : "Sem data"}
-                        {c.parcelas && ` • ${c.parcelas}x`}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-xl text-terciaria">
-                        {formatCurrency(calcContaTotal(c))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }) : (
-                <div className="bg-primaria p-8 rounded-lg text-center">
-                  <div className="text-4xl mb-3">📋</div>
-                  <p className="text-white font-zalando text-lg mb-2">
-                    Nenhuma conta registrada
-                  </p>
-                  <p className="text-gray-400">
-                    Adicione contas para começar a análise
-                  </p>
-                </div>
-              )}
+      return (
+        <div key={c.id} className={`${statusBgColor} p-4 rounded-lg flex justify-between items-center hover:bg-opacity-80 transition`}>
+          <div className="flex-1">  
+            <div className="flex items-center gap-3 ">
+              <div className="font-semibold text-xl text-white  font-zalando">{c.nome}</div>
+              
             </div>
-          </section>
+            <div className="text-xs text-white font-zalando mt-1">
+              {vencimento ? vencimento.toLocaleDateString('pt-BR') : "Sem data"}
+             
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="font-semibold text-lg text-white font-zalando">
+              {formatCurrency(calcContaTotal(c))}
+               {c.parcelas && `  ${c.parcelas}x`}
+               
+            </div>
+             <span className=" text-xs font-zalando justify-center items-center flex rounded bg-primar text-white">
+                {statusText}
+              </span> 
+          </div>
+        </div>
+      );
+    }) : (
+      <div className="bg-primaria p-8 rounded-lg text-center">
+        <div className="text-4xl mb-3">📋</div>
+        <p className="text-white font-zalando text-lg mb-2">
+          Nenhuma conta registrada
+        </p>
+        <p className="text-gray-400">
+          Adicione contas para começar a análise
+        </p>
+      </div>
+    )}
+  </div>
+</section>
         </>
       )}
     </div>
