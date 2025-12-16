@@ -37,8 +37,8 @@ function App() {
         <Route path="/Login" element={<Login />} />
         <Route path="/Cadastro" element={<Cadastro />} />
 
-  <Route path="/dashboard" element={<Dashboard />} />
-  <Route path="/tabela/:id" element={<TabelaDashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/tabela/:id" element={<TabelaDashboard />} />
         {/* Páginas que exigem login */}
         <Route
           path="/UserSetup"
@@ -49,11 +49,11 @@ function App() {
           }
         />
 
-       <Route path="/Settings" element={
-  <ProtectedRoute>
-    <UserSettings />
-  </ProtectedRoute>
-} />
+        <Route path="/Settings" element={
+          <ProtectedRoute>
+            <UserSettings />
+          </ProtectedRoute>
+        } />
 
 
         <Route
@@ -65,14 +65,14 @@ function App() {
           }
         />
 
-<Route
-  path="/dashboard"
-  element={
-    <ProtectedRoute>
-    
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+
+            </ProtectedRoute>
+          }
+        />
 
 
 

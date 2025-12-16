@@ -51,7 +51,7 @@ const Navbar = () => {
       <div className="hidden h-16 md:flex justify-between items-center w-full px-8">
         
         <Link to="/">
-          <img src="img/Healthy-logo.png" alt="Logo" className="pt-2 w-24 h-24" />
+          <img src="./img/Healthy-logo.png" alt="Logo" className="pt-2 w-24 h-24" />
         </Link>
 
         <div className="flex gap-8 items-center">

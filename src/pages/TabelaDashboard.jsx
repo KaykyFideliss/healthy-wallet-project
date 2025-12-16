@@ -17,15 +17,19 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { 
-  FaArrowLeft, 
-  FaArrowUp, 
-  FaArrowDown, 
-  FaChartLine, 
+import {
+  FaArrowLeft,
+  FaArrowUp,
+  FaArrowDown,
+  FaChartLine,
   FaMoneyBillWave,
-  FaPiggyBank, 
-  FaExclamationTriangle 
+  FaPiggyBank,
+  FaExclamationTriangle,
+  FaArrowRight,
+  FaCheck,
+   FaClipboardList
 } from "react-icons/fa";
+
 import { motion } from "framer-motion";
 
 const COLORS_BY_STATUS = {
@@ -64,10 +68,11 @@ export default function TabelaDashboard() {
     text: "Clique em um setor do gráfico para mais detalhes",
   });
 
+
   // Carregar tudo em uma única chamada
   async function loadAll() {
     if (!user || !id) return;
-    
+
     setLoading(true);
     try {
       const [tabelaRes, contasRes, pagamentosRes, profileRes, snapshotsRes] = await Promise.all([
@@ -76,25 +81,25 @@ export default function TabelaDashboard() {
           .select("id, nome, criada_em")
           .eq("id", id)
           .single(),
-        
+
         supabase
           .from("contas")
           .select("id, nome, vencimento, parcelas, valor, tabela_id")
           .eq("tabela_id", id)
           .order("vencimento", { ascending: true }),
-        
+
         supabase
           .from("pagamentos")
           .select("id, conta_id, tabela_id, valor_pago, pago_em")
           .eq("tabela_id", id)
           .order("pago_em", { ascending: false }),
-        
+
         supabase
           .from("profiles")
           .select("salario")
           .eq("id", user.id)
           .single(),
-        
+
         supabase
           .from("tabela_snapshots")
           .select("*")
@@ -141,7 +146,7 @@ export default function TabelaDashboard() {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     const today = new Date(now);
-    
+
     const later = new Date();
     later.setDate(now.getDate() + 7);
     later.setHours(0, 0, 0, 0);
@@ -193,7 +198,9 @@ export default function TabelaDashboard() {
   // Salvar snapshot mensal
   useEffect(() => {
     if (!user || !id || !salary || metrics.totalGeral === 0) return;
-    
+
+
+
     const salvarSnapshotMensal = async () => {
       const hoje = new Date();
       const ano = hoje.getFullYear();
@@ -223,7 +230,7 @@ export default function TabelaDashboard() {
           total_pendente: metrics.debito,
           percentual_se: salary > 0 ? (metrics.totalGeral / salary) * 100 : 0,
         });
-        
+
         // Recarregar snapshots
         const { data: novosSnapshots } = await supabase
           .from("tabela_snapshots")
@@ -231,7 +238,7 @@ export default function TabelaDashboard() {
           .eq("tabela_id", id)
           .order("ano", { ascending: true })
           .order("mes", { ascending: true });
-        
+
         setSnapshots(novosSnapshots || []);
       } catch (error) {
         console.error("Erro ao salvar snapshot:", error);
@@ -241,7 +248,7 @@ export default function TabelaDashboard() {
     // Executar apenas uma vez por dia
     const lastSnapshot = localStorage.getItem(`lastSnapshot_${id}`);
     const hoje = new Date().toDateString();
-    
+
     if (lastSnapshot !== hoje) {
       salvarSnapshotMensal();
       localStorage.setItem(`lastSnapshot_${id}`, hoje);
@@ -265,10 +272,29 @@ export default function TabelaDashboard() {
     };
   }, [salary, metrics]);
 
+  const simulatedCurrentMonth = useMemo(() => {
+    if (!salary || metrics.totalGeral === 0) return null;
+
+    const hoje = new Date();
+    const mes = hoje.getMonth() + 1;
+    const ano = hoje.getFullYear();
+
+    return {
+      mes,
+      ano,
+      total_gasto: metrics.totalGeral,
+      total_pago: metrics.totalPago,
+      total_pendente: metrics.debito,
+      percentual_se: salary > 0 ? (metrics.totalGeral / salary) * 100 : 0,
+      simulated: true, // 🔥 importante
+    };
+  }, [metrics, salary]);
+
+
   // DADOS DO GRÁFICO DE PIZZA
   const pieData = useMemo(() => {
     const data = [];
-    
+
     // Pago
     if (metrics.totalPago > 0) {
       data.push({
@@ -279,7 +305,7 @@ export default function TabelaDashboard() {
         percent: metrics.percentPago,
       });
     }
-    
+
     // Pendente Normal
     if (metrics.valorPendenteNormal > 0) {
       data.push({
@@ -290,7 +316,7 @@ export default function TabelaDashboard() {
         percent: metrics.totalGeral > 0 ? (metrics.valorPendenteNormal / metrics.totalGeral) * 100 : 0,
       });
     }
-    
+
     // Vencendo
     if (metrics.valorVencendo > 0) {
       data.push({
@@ -301,7 +327,7 @@ export default function TabelaDashboard() {
         percent: metrics.percentVencendo,
       });
     }
-    
+
     // Atrasado
     if (metrics.valorAtrasado > 0) {
       data.push({
@@ -338,6 +364,11 @@ export default function TabelaDashboard() {
       .slice(0, 10);
   }, [contas]);
 
+      const contasPagasIds = useMemo(() => {
+  return new Set(pagamentos.map(p => p.conta_id));
+}, [pagamentos]);
+
+
   // COMPARAÇÃO MENSAL
   const monthlyComparison = useMemo(() => {
     if (snapshots.length < 2) return null;
@@ -345,15 +376,15 @@ export default function TabelaDashboard() {
     const hoje = new Date();
     const mesAtual = hoje.getMonth() + 1;
     const anoAtual = hoje.getFullYear();
-    
+
     const mesAnterior = mesAtual === 1 ? 12 : mesAtual - 1;
     const anoAnterior = mesAtual === 1 ? anoAtual - 1 : anoAtual;
 
-    const snapshotAtual = snapshots.find(s => 
+    const snapshotAtual = snapshots.find(s =>
       s.ano === anoAtual && s.mes === mesAtual
     );
-    
-    const snapshotAnterior = snapshots.find(s => 
+
+    const snapshotAnterior = snapshots.find(s =>
       s.ano === anoAnterior && s.mes === mesAnterior
     );
 
@@ -362,29 +393,29 @@ export default function TabelaDashboard() {
     const diffGasto = snapshotAtual.total_gasto - snapshotAnterior.total_gasto;
     const diffPago = snapshotAtual.total_pago - snapshotAnterior.total_pago;
     const diffPendente = snapshotAtual.total_pendente - snapshotAnterior.total_pendente;
-    
-    const percentGasto = snapshotAnterior.total_gasto > 0 
-      ? (diffGasto / snapshotAnterior.total_gasto) * 100 
+
+    const percentGasto = snapshotAnterior.total_gasto > 0
+      ? (diffGasto / snapshotAnterior.total_gasto) * 100
       : diffGasto > 0 ? 100 : 0;
-    
+
     const percentPago = snapshotAnterior.total_pago > 0
       ? (diffPago / snapshotAnterior.total_pago) * 100
       : diffPago > 0 ? 100 : 0;
 
     const insights = [];
-    
+
     if (percentGasto > 20) {
       insights.push("Seus gastos aumentaram significativamente este mês");
     } else if (percentGasto < -20) {
       insights.push("Ótimo controle de gastos este mês!");
     }
-    
+
     if (snapshotAtual.percentual_se > 80) {
       insights.push("Cuidado: mais de 80% do salário comprometido");
     } else if (snapshotAtual.percentual_se < 50) {
       insights.push("Boa gestão: menos de 50% do salário comprometido");
     }
-    
+
     if (diffPendente > 0) {
       insights.push("Atenção: dívidas pendentes aumentaram");
     }
@@ -414,7 +445,7 @@ export default function TabelaDashboard() {
   // DADOS PARA GRÁFICO DE COMPARAÇÃO
   const comparisonChartData = useMemo(() => {
     if (!monthlyComparison) return [];
-    
+
     return [
       {
         name: 'Gastos',
@@ -436,17 +467,43 @@ export default function TabelaDashboard() {
 
   // DADOS PARA GRÁFICO DE EVOLUÇÃO
   const evolutionChartData = useMemo(() => {
-    const ultimos6Meses = snapshots.slice(-6);
-    if (ultimos6Meses.length === 0) return [];
-    
-    return ultimos6Meses.map(s => ({
-      name: `${String(s.mes).padStart(2, '0')}/${String(s.ano).slice(-2)}`,
-      gasto: Number(s.total_gasto),
-      pago: Number(s.total_pago),
-      pendente: Number(s.total_pendente),
-      percentual: Number(s.percentual_se),
-    }));
-  }, [snapshots]);
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth() + 1;
+    const anoAtual = hoje.getFullYear();
+
+    const mesAnterior = mesAtual === 1 ? 12 : mesAtual - 1;
+    const anoAnterior = mesAtual === 1 ? anoAtual - 1 : anoAtual;
+
+    const snapshotAnterior = snapshots.find(
+      s => s.mes === mesAnterior && s.ano === anoAnterior
+    );
+
+    const data = [];
+
+    // MÊS ANTERIOR (real)
+    if (snapshotAnterior) {
+      data.push({
+        name: `${String(mesAnterior).padStart(2, "0")}/${String(anoAnterior).slice(-2)}`,
+        gasto: snapshotAnterior.total_gasto,
+        pago: snapshotAnterior.total_pago,
+        percentual: snapshotAnterior.percentual_se,
+      });
+    }
+
+    // MÊS ATUAL (simulado)
+    if (simulatedCurrentMonth) {
+      data.push({
+        name: `${String(mesAtual).padStart(2, "0")}/${String(anoAtual).slice(-2)}`,
+        gasto: simulatedCurrentMonth.total_gasto,
+        pago: simulatedCurrentMonth.total_pago,
+        percentual: simulatedCurrentMonth.percentual_se,
+        simulated: true,
+      });
+    }
+
+    return data;
+  }, [snapshots, simulatedCurrentMonth]);
+
 
   // Função para renderizar o gráfico de pizza corretamente
   const renderPieChart = () => {
@@ -469,7 +526,7 @@ export default function TabelaDashboard() {
             outerRadius={70}
             paddingAngle={pieData.length > 1 ? 2 : 0}
             onClick={(data) => setSelectedStatus(data)}
-          
+
             labelLine={true}
           >
             {pieData.map((entry, i) => (
@@ -482,20 +539,20 @@ export default function TabelaDashboard() {
               />
             ))}
           </Pie>
-<Tooltip
-  content={({ active, payload }) => {
-    if (!active || !payload || payload.length === 0) return null;
-    
-    const data = payload[0].payload;
-    return (
-      <div className="bg-white p-3 rounded-lg border border-gray-700">
-        <p className="font-bold font-zalando text-primaria mb-1">{data.name}</p>
-        <p className="text-primaria font-zalando">{formatCurrency(data.valor || 0)}</p>
-       
-      </div>
-    );
-  }}
-/>
+          <Tooltip
+            content={({ active, payload }) => {
+              if (!active || !payload || payload.length === 0) return null;
+
+              const data = payload[0].payload;
+              return (
+                <div className="bg-white p-3 rounded-lg border border-gray-700">
+                  <p className="font-bold font-zalando text-primaria mb-1">{data.name}</p>
+                  <p className="text-primaria font-zalando">{formatCurrency(data.valor || 0)}</p>
+
+                </div>
+              );
+            }}
+          />
         </PieChart>
       </ResponsiveContainer>
     );
@@ -504,7 +561,7 @@ export default function TabelaDashboard() {
   return (
     <div className="p-4 md:p-6 mt-0 md:mt-6 lg:mt-8">
       {/* Botão voltar */}
-      <button 
+      <button
         className="bg-secundaria font-zalando flex items-center mt-7 justify-center text-center text-white px-4 py-2 rounded-lg mb-6 hover:bg-opacity-90 transition"
         onClick={() => navigate("/dashboard")}
       >
@@ -530,23 +587,23 @@ export default function TabelaDashboard() {
           {/* CARDS PRINCIPAIS */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {[
-              { 
-                label: "Total Geral", 
+              {
+                label: "Total Geral",
                 value: metrics.totalGeral,
-              
+
               },
-              { 
-                label: "Total Pago", 
+              {
+                label: "Total Pago",
                 value: metrics.totalPago,
-                
+
               },
-              { 
-                label: "Débito Pendente", 
+              {
+                label: "Débito Pendente",
                 value: metrics.debito,
-               
+
               },
             ].map((item, idx) => (
-              <motion.div 
+              <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -556,7 +613,7 @@ export default function TabelaDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="">
-                    <h3 className=" text-lg font-semibold  text-white font-zalando">{item.label}</h3>
+                      <h3 className=" text-lg font-semibold  text-white font-zalando">{item.label}</h3>
                     </div>
                     <div className="text-2xl font-bold text-terciaria font-zalando mt-2">
                       {formatCurrency(item.value)}
@@ -577,18 +634,14 @@ export default function TabelaDashboard() {
               <h3 className="font-semibold text-white font-zalando text-xl mb-4 text-center">
                 SITUAÇÃO FINANCEIRA
               </h3>
-              
+
               {renderPieChart()}
-              
+
               {/* Legenda */}
               <div className="mt-4 space-y-2">
                 <p className="text-sm text-center text-white font-zalando mb-3">
                   {selectedStatus.text}
                 </p>
-                
-              
-                
-            
               </div>
             </div>
 
@@ -597,9 +650,9 @@ export default function TabelaDashboard() {
               <h3 className="font-semibold  text-white font-zalando text-base mb-4 text-center">
                 OS 10 MAIORES GASTOS
               </h3>
-              
+
               {barData.length > 0 ? (
-                <div  style={{ width: "100%", height: 300 }}>
+                <div style={{ width: "100%", height: 300 }}>
                   <ResponsiveContainer>
                     <BarChart
                       data={barData}
@@ -656,28 +709,28 @@ export default function TabelaDashboard() {
           {salaryMetrics && (
             <section className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 font-zalando ">
               {[
-                { 
-                  label: "Salário", 
-                  value: salary, 
+                {
+                  label: "Salário",
+                  value: salary,
                   color: "text-terciaria",
                   description: "Renda mensal"
-                 
+
                 },
-                { 
-                  label: "Comprometido", 
-                  value: `${salaryMetrics.percentualComprometido.toFixed(1)}%`, 
+                {
+                  label: "Comprometido",
+                  value: `${salaryMetrics.percentualComprometido.toFixed(1)}%`,
                   color: "text-terciaria",
                   description: "Do salário"
                 },
-                { 
-                  label: "Saldo Livre", 
-                  value: salaryMetrics.saldoLivre, 
+                {
+                  label: "Saldo Livre",
+                  value: salaryMetrics.saldoLivre,
                   color: salaryMetrics.saldoLivre < 0 ? "text-red-500" : "text-green-500",
                   description: salaryMetrics.saldoLivre < 0 ? "Negativo" : "Disponível para uso"
                 },
-                { 
-                  label: "Limite Diário", 
-                  value: salaryMetrics.salarioDiario, 
+                {
+                  label: "Limite Diário",
+                  value: salaryMetrics.salarioDiario,
                   color: "text-terciaria",
                   description: "Para gastos extras"
                 },
@@ -687,7 +740,7 @@ export default function TabelaDashboard() {
                     {item.label}
                   </div>
                   <div className={`text-base font-bold font-zalando mt-1 ${item.color}`}>
-                    {typeof item.value === 'number' 
+                    {typeof item.value === 'number'
                       ? formatCurrency(item.value)
                       : item.value}
                   </div>
@@ -699,203 +752,220 @@ export default function TabelaDashboard() {
             </section>
           )}
 
-{/* COMPARAÇÃO MENSAL - SEMPRE VISÍVEL */}
+          {/* COMPARAÇÃO MENSAL - SEMPRE VISÍVEL */}
+          <section className="mb-8">
+            <div className="bg-primaria p-4 rounded-lg">
+              <div className="flex justify-center">
+                <h3 className="text-white text-3xl font-semibold mb-4 font-zalando">
+                  Evolução dos Gastos
+                </h3>
+              </div>
+              {evolutionChartData.length > 0 ? (
+                <>
+                  <div className="font-zalando text-xs" style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                      <AreaChart data={evolutionChartData}>
+                        <XAxis
+                          dataKey="name"
+                          tick={{ fill: '#fff' }}
+                        
+                          axisLine={{ stroke: "#FFFFFF", strokeWidth: 2 }}
+                        />
+                        <YAxis
+                          tick={{ fill: '#fff' }}
+                          tickFormatter={(v) => formatCurrency(v).replace('R$', '')}
+                          
+                          axisLine={{ stroke: "#FFFFFF", strokeWidth: 2 }}
+                        />
+                        <Tooltip
+                          formatter={(value) => [formatCurrency(value), 'Valor']}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="gasto"
+                          name="Gastos"
+                          stroke="#ffcc00"
+                          fill="#ffcc00"
+                          fillOpacity={0.3}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="pago"
+                          name="Pago"
+                          stroke="#03664E"
+                          fill="#03664E"
+                          fillOpacity={0.3}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="percentual"
+                          name="% do Salário"
+                          stroke="#000000"
+                          strokeWidth={2}
+                          dot={{ r: 3 }}
+                          yAxisId="right"
+                        />
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          tick={{ fill: '#fff' }}
+                          axisLine={{ stroke: "#FFFFFF", strokeWidth: 2 }}
+                          tickFormatter={(v) => `${v.toFixed(0)}%`}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="flex justify-center gap-6 mt-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full border border-white/20 shadow bg-[#ffc800]"></div>
+                      <span className="text-white text-xs font-zalando">Gastos</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full border border-white/20 shadow bg-secundaria"></div>
+                      <span className="text-white text-xs font-zalando">Pago</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                       <div className="w-3 h-3 rounded-full border border-white/20 shadow bg-black "></div>
+                      <span className="text-white text-xs font-zalando ">% Salário</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 text-center">
+                    <p className="text-white text-sm font-zalando">
+                      Comparação entre mês anterior e mês atual
+                      <br />
+                      <span className="text-xs opacity-70">
+                        * Mês atual em andamento (valores parciais)
+                      </span>
+                    </p>
+
+                  </div>
+                </>
+              ) : (
+
+                <div className="py-3 text-center">
+                  <div className="text-6xl text-white items-center flex justify-center">
+                    {/* <FaClipboardList  className=" text-white "/> */}
+                    </div>
+                  {/* <h4 className="text-white font-semibold font-zalando text-lg mb-2">
+                    Histórico de Evolução
+                  </h4> */}
+                  <p className="text-secundaria font-zalando text-base  mb-4">
+                    O histórico começará a ser registrado automaticamente
+                  </p>
+
+                  <div className="inline-grid grid-cols-3 gap-2 mb-4">
+                    <div className="bg-secundaria p-2 rounded text-center">
+                      <p className="text-xs text-white font-zalando">Snapshots</p>
+                      <p className="text-white font-zalando font-bold">{snapshots.length}</p>
+                    </div>
+                    <div className="bg-secundaria  p-2 rounded text-center">
+                          <p className="text-xs text-white font-zalando">Contas</p>
+                      <p className="text-white font-zalando font-bold">{contas.length}</p>
+                    </div>
+                     <div className="bg-secundaria p-2 rounded text-center">
+                      <p className="text-xs text-white font-zalando">Mês</p>
+                      <p className="text-white font-bold font-zalando">{new Date().getMonth() + 1}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-left max-w-md mx-auto bg-secundaria p-4 rounded">
+                    <p className=" text-sm mb-2 font-zalando text-white">Próximos passos:</p>
+                    <ul className="text-white font-zalando  text-xs space-y-1">
+                      <li className="flex items-center">
+                        <span className="text-white mr-2">
+                          <FaCheck />
+                          </span>
+                        Adicione contas na tabela
+                      </li>
+                      <li className="flex items-center">
+                       <span className="text-white mr-2">
+                          <FaCheck />
+                          </span>
+                        Configure seu salário no perfil
+                      </li>
+                      <li className="flex items-center">
+                        <span className={pagamentos.length > 0 ? "text-white" : "text-yellow-400"}>{pagamentos.length > 0 ?   <FaCheck />  : "○"}</span>
+                        <span className="ml-2">Registre pagamentos ({pagamentos.length} registrados)</span>
+                      </li>
+                      <li className="flex items-center">
+                        <span className={snapshots.length > 0 ? "text-white" : "text-yellow-400"}>{snapshots.length > 0 ? <FaCheck /> : "○"}</span>
+                        <span className="ml-2">Aguarde o próximo mês para histórico ({snapshots.length} snapshots)</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
 
 
-{/* GRÁFICO DE EVOLUÇÃO - SEMPRE VISÍVEL 
-<section className="mb-8">
-  <div className="bg-primaria p-4 rounded-lg">
-    <h3 className="text-white font-semibold mb-4 font-zalando">
-      Evolução dos Gastos
-    </h3>
-    
-    {evolutionChartData.length > 0 ? (
-      <>
-        <div style={{ width: '100%', height: 300 }}>
-          <ResponsiveContainer>
-            <AreaChart data={evolutionChartData}>
-              <XAxis 
-                dataKey="name" 
-                tick={{ fill: '#fff' }}
-                axisLine={{ stroke: '#fff' }}
-              />
-              <YAxis 
-                tick={{ fill: '#fff' }}
-                tickFormatter={(v) => formatCurrency(v).replace('R$', '')}
-                axisLine={{ stroke: '#fff' }}
-              />
-              <Tooltip
-                formatter={(value) => [formatCurrency(value), 'Valor']}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="gasto" 
-                name="Gastos" 
-                stroke="#ffcc00" 
-                fill="#ffcc00" 
-                fillOpacity={0.3}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="pago" 
-                name="Pago" 
-                stroke="#03664E" 
-                fill="#03664E" 
-                fillOpacity={0.3}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="percentual" 
-                name="% do Salário" 
-                stroke="#8B5CF6" 
-                strokeWidth={2}
-                dot={{ r: 3 }}
-                yAxisId="right"
-              />
-              <YAxis 
-                yAxisId="right"
-                orientation="right"
-                tick={{ fill: '#fff' }}
-                tickFormatter={(v) => `${v.toFixed(0)}%`}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex justify-center gap-6 mt-4">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 bg-[#ffcc00]"></div>
-            <span className="text-white text-xs">Gastos</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 bg-[#03664E]"></div>
-            <span className="text-white text-xs">Pago</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 bg-[#8B5CF6]"></div>
-            <span className="text-white text-xs">% Salário</span>
-          </div>
-        </div>
-        
-        <div className="mt-4 text-center">
-          <p className="text-gray-300 text-sm">
-            Mostrando dados dos últimos {evolutionChartData.length} meses
-          </p>
-        </div>
-      </>
-    ) : (
-      
-      <div className="py-8 text-center">
-        <div className="text-4xl mb-3">📈</div>
-        <h4 className="text-white font-zalando text-lg mb-2">
-          Histórico de Evolução
-        </h4>
-        <p className="text-gray-300 mb-4">
-          O histórico começará a ser registrado automaticamente
-        </p>
-        
-        <div className="inline-grid grid-cols-3 gap-2 mb-4">
-          <div className="bg-gray-800/50 p-2 rounded text-center">
-            <p className="text-xs text-gray-400">Snapshots</p>
-            <p className="text-white font-bold">{snapshots.length}</p>
-          </div>
-          <div className="bg-gray-800/50 p-2 rounded text-center">
-            <p className="text-xs text-gray-400">Contas</p>
-            <p className="text-white font-bold">{contas.length}</p>
-          </div>
-          <div className="bg-gray-800/50 p-2 rounded text-center">
-            <p className="text-xs text-gray-400">Mês</p>
-            <p className="text-white font-bold">{new Date().getMonth() + 1}</p>
-          </div>
-        </div>
-        
-        <div className="text-left max-w-md mx-auto bg-gray-800/30 p-4 rounded">
-          <p className="text-gray-400 text-sm mb-2">Próximos passos:</p>
-          <ul className="text-gray-300 text-sm space-y-1">
-            <li className="flex items-center">
-              <span className="text-green-400 mr-2">✓</span>
-              Adicione contas na tabela
-            </li>
-            <li className="flex items-center">
-              <span className="text-green-400 mr-2">✓</span>
-              Configure seu salário no perfil
-            </li>
-            <li className="flex items-center">
-              <span className={pagamentos.length > 0 ? "text-green-400" : "text-yellow-400"}>{pagamentos.length > 0 ? "✓" : "○"}</span>
-              <span className="ml-2">Registre pagamentos ({pagamentos.length} registrados)</span>
-            </li>
-            <li className="flex items-center">
-              <span className={snapshots.length > 0 ? "text-green-400" : "text-yellow-400"}>{snapshots.length > 0 ? "✓" : "○"}</span>
-              <span className="ml-2">Aguarde o próximo mês para histórico ({snapshots.length} snapshots)</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    )}
-  </div>
-</section>
-*/}
-
-        {/* LISTA DE CONTAS */}
-<section className="mb-6">
-  <h3 className="font-semibold mb-4 text-white text-xl font-zalando">Contas</h3>
-  <div className="flex flex-col gap-3">
-    {contas.length > 0 ? contas.map(c => {
+          {/* LISTA DE CONTAS */}
+          <section className="mb-6">
+            <div className="flex items-center justify-center pt-5 pb-3">
+              <h3 className="font-semibold mb-4 text-white text-3xl font-zalando">CONTAS NÃO PAGAS</h3>
+            </div>
+            <div className="flex flex-col gap-3">
+          {contas.filter(c => !contasPagasIds.has(c.id)).length > 0 ? (
+  contas
+    .filter(c => !contasPagasIds.has(c.id))
+    .map(c => {
       const vencimento = c.vencimento ? new Date(c.vencimento) : null;
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
-      
-      // Defina a classe CSS completa aqui
+
       let statusBgColor = "bg-primaria";
       let statusText = "Pendente";
-      
+
       if (vencimento) {
         vencimento.setHours(0, 0, 0, 0);
         if (vencimento < hoje) {
           statusBgColor = "bg-red-600";
           statusText = "Atrasada";
         } else if ((vencimento - hoje) / (1000 * 60 * 60 * 24) <= 7) {
-          statusBgColor = "bg-orange-500";
+          statusBgColor = "bg-yellow-400";
           statusText = "Vencendo";
         }
       }
 
       return (
-        <div key={c.id} className={`${statusBgColor} p-4 rounded-lg flex justify-between items-center hover:bg-opacity-80 transition`}>
-          <div className="flex-1">  
-            <div className="flex items-center gap-3 ">
-              <div className="font-semibold text-xl text-white  font-zalando">{c.nome}</div>
-              
+        <div
+          key={c.id}
+          className={`${statusBgColor} p-4 rounded-lg flex justify-between items-center hover:bg-opacity-80 transition`}
+        >
+          <div className="flex-1">
+            <div className="font-semibold text-xl text-white font-zalando">
+              {c.nome}
             </div>
             <div className="text-xs text-white font-zalando mt-1">
-              {vencimento ? vencimento.toLocaleDateString('pt-BR') : "Sem data"}
-             
+              {vencimento
+                ? vencimento.toLocaleDateString("pt-BR")
+                : "Sem data"}
             </div>
           </div>
+
           <div className="text-right">
             <div className="font-semibold text-lg text-white font-zalando">
               {formatCurrency(calcContaTotal(c))}
-               {c.parcelas && `  ${c.parcelas}x`}
-               
+              {c.parcelas && ` ${c.parcelas}x`}
             </div>
-             <span className=" text-xs font-zalando justify-center items-center flex rounded bg-primar text-white">
-                {statusText}
-              </span> 
+            <span className="text-xs font-zalando flex justify-center items-center text-white">
+              {statusText}
+            </span>
           </div>
         </div>
       );
-    }) : (
-      <div className="bg-primaria p-8 rounded-lg text-center">
-        <div className="text-4xl mb-3">📋</div>
-        <p className="text-white font-zalando text-lg mb-2">
-          Nenhuma conta registrada
-        </p>
-        <p className="text-gray-400">
-          Adicione contas para começar a análise
-        </p>
-      </div>
-    )}
+    })
+) : (
+  <div className="bg-primaria p-8 rounded-lg text-center">
+    <p className="text-white font-zalando text-lg">
+      Nenhuma conta pendente
+    </p>
   </div>
-</section>
+)}
+
+            </div>
+          </section>
         </>
       )}
     </div>
