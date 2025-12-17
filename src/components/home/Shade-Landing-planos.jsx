@@ -138,7 +138,7 @@ export function HeroGeometricPlano({
         </div>  
       </motion.div>
       
-      <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/60 pointer-events-none" />
+      
     </motion.div>
   );
 }

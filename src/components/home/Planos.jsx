@@ -2,7 +2,13 @@ import React from 'react'
 import { FaCheck } from "react-icons/fa"
 import { ImCross } from "react-icons/im";
 import { HeroGeometricPlano } from "./Shade-Landing-planos";
+import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
+
 const Planos = () => {
+
+  const Navigate = useNavigate();
+
   return (
     <div>
      
@@ -72,20 +78,21 @@ const Planos = () => {
 
                 <p className=' text-sm line-through text-white font-zalando flex items-center gap-2'>
                 <ImCross className='text-red-600' />
-                Dashboard simples
+                IA Financeira
               </p>
                 <p className=' text-sm line-through text-white font-zalando flex items-center gap-2'>
                 <ImCross className='text-red-600' />
-                Dashboard simples
+                Pagina de investimento com IA
               </p>
                 <p className=' text-sm line-through text-white font-zalando flex items-center gap-2'>
-                <ImCross className='text-red-600' />
-                Dashboard simples
+                <br />
               </p> 
              
             </div>
 
-            <button className='w-full bg-primaria font-zalando text-white dari py-3 rounded-lg font-semibold hover:bg-secundaria transition duration-200'>
+            <button className='w-full bg-primaria font-zalando text-white dari py-3 rounded-lg font-semibold hover:bg-secundaria transition duration-200'
+             onClick={() => Navigate('/MinhasContas')}
+            >
               Começar Agora
             </button>
           </div>
@@ -144,8 +151,8 @@ const Planos = () => {
               </p>
             </div>
 
-            <button className='w-full bg-primaria font-zalando text-white dari py-3 rounded-lg font-semibold hover:bg-secundaria transition duration-200'>
-              Começar Agora
+                        <button className='w-full bg-black border border-primaria font-zalando text-white py-3 rounded-lg font-semibold cursor-default transition duration-200'>
+              Em Desenvolvimento 
             </button>
           </div>
 
@@ -203,8 +210,8 @@ const Planos = () => {
               </p>
             </div>
 
-            <button className='w-full bg-primaria font-zalando text-white dari py-3 rounded-lg font-semibold hover:bg-secundaria transition duration-200'>
-              Começar Agora
+            <button className='w-full bg-black border border-primaria font-zalando text-white py-3 rounded-lg font-semibold cursor-default transition duration-200'>
+              Em Desenvolvimento 
             </button>
           </div>
         </div>

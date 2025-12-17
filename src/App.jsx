@@ -9,7 +9,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import UserSettings from "./pages/UserSettings";
 import Dashboard from "./pages/Dashboard";
 import TabelaDashboard from "./pages/TabelaDashboard";
-
+import AuthCallback from "./auth/Callback";
 
 // 🔐 Rota protegida
 const ProtectedRoute = ({ children }) => {
@@ -17,7 +17,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (user === undefined) {
     return (
-      <div className="text-white text-center pt-10 text-lg">
+      <div className="text-white text-center pt-10 text-lg font-zalando ">
         Carregando...
       </div>
     );
@@ -74,6 +74,7 @@ function App() {
           }
         />
 
+<Route path="/auth/callback" element={<AuthCallback />} />
 
 
 
