@@ -24,7 +24,7 @@ const CardPrincipais = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="relative flex justify-center md:justify-left order-1 lg:order-2"
+            className="relative flex justify-center md:justify-left order-2 lg:order-1 "
           >
             <div className="hidden lg:block absolute left-20 top-4 w-72 h-32 bg-white rounded-lg shadow-lg z-0" />
 
@@ -42,7 +42,7 @@ const CardPrincipais = () => {
             </div>
           </motion.div>
 
-<div className=' justify-center items-center mx-auto font-zalando'>
+<div className=' justify-center items-center mx-auto font-zalando order-1 lg:order-1'>
           <h2 className='text-primaria font-semibold pb-2 text-center lg:text-left   '>TOTAL GERADO</h2>
           {/* TEXTO */}
           <p className="text-white font-zalando text-justify leading-relaxed max-w-lg ">
@@ -72,7 +72,7 @@ const CardPrincipais = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="relative flex justify-center order-1 lg:order-2"
+            className="relative flex justify-center md:justify-left  order-1 lg:order-2"
           >
             <div className="hidden lg:block absolute right-20 top-4 w-72 h-32 bg-white rounded-lg shadow-lg z-0" />
 
@@ -101,7 +101,7 @@ const CardPrincipais = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="relative flex justify-center order-2 lg:order-1"
+            className="relative flex justify-center md:justify-left order-2 lg:order-1"
           >
             <div className="hidden lg:block absolute left-20 top-4 w-72 h-32 bg-white rounded-lg shadow-lg z-0" />
 

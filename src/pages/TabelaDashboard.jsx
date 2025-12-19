@@ -35,7 +35,7 @@ import { motion } from "framer-motion";
 const COLORS_BY_STATUS = {
   Pago: "#03664E",
   Pendente: "#ffbb00",
-  Vencendo: "#fc7303",
+  Vencendo: "#ffc800",
   Atrasado: "#dc2626",
 };
 
@@ -177,6 +177,7 @@ export default function TabelaDashboard() {
     const percentVencendo = totalGeral > 0 ? (valorVencendo / totalGeral) * 100 : 0;
     const percentAtrasado = totalGeral > 0 ? (valorAtrasado / totalGeral) * 100 : 0;
 
+    
     return {
       totalGeral,
       totalPago,
@@ -290,6 +291,12 @@ export default function TabelaDashboard() {
     };
   }, [metrics, salary]);
 
+  const qtdPendenteNormal =
+  metrics.qtdPendente - metrics.qtdVencendo - metrics.qtdAtrasadas;
+
+const valorPendenteNormal =
+  metrics.valorPendente - metrics.valorVencendo - metrics.valorAtrasado;
+
 
   // DADOS DO GRÁFICO DE PIZZA
   const pieData = useMemo(() => {
@@ -307,15 +314,18 @@ export default function TabelaDashboard() {
     }
 
     // Pendente Normal
-    if (metrics.valorPendenteNormal > 0) {
-      data.push({
-        name: "Pendente",
-        value: Math.max(metrics.valorPendenteNormal, 1),
-        valor: metrics.valorPendenteNormal,
-        text: `${metrics.qtdPendente - metrics.qtdVencendo - metrics.qtdAtrasadas} conta(s) pendente(s) - ${formatCurrency(metrics.valorPendenteNormal)}`,
-        percent: metrics.totalGeral > 0 ? (metrics.valorPendenteNormal / metrics.totalGeral) * 100 : 0,
-      });
-    }
+if (valorPendenteNormal > 0 && qtdPendenteNormal > 0) {
+  data.push({
+    name: "Pendente",
+    value: valorPendenteNormal,
+    valor: valorPendenteNormal,
+    text: `${qtdPendenteNormal} conta(s) pendente(s) - ${formatCurrency(valorPendenteNormal)}`,
+    percent:
+      metrics.totalGeral > 0
+        ? (valorPendenteNormal / metrics.totalGeral) * 100
+        : 0,
+  });
+}
 
     // Vencendo
     if (metrics.valorVencendo > 0) {
@@ -546,8 +556,8 @@ export default function TabelaDashboard() {
               const data = payload[0].payload;
               return (
                 <div className="bg-white p-3 rounded-lg border border-gray-700">
-                  <p className="font-bold font-zalando text-primaria mb-1">{data.name}</p>
-                  <p className="text-primaria font-zalando">{formatCurrency(data.valor || 0)}</p>
+                  <p className="font-bold font-zalando text-terciaria mb-1">{data.name}</p>
+                  <p className="text-terciaria font-zalando">{formatCurrency(data.valor || 0)}</p>
 
                 </div>
               );

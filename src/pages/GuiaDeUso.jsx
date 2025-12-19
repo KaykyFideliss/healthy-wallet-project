@@ -2,6 +2,11 @@ import React from 'react'
 import { motion } from "framer-motion";
 import { HeroGeometric } from '@/components/home/guia/Shade-Landing-Guia';
 import CardPrincipais from "../components/home/guia/grafics/CardPrincipais"
+import GraficPizza from '../components/home/guia/grafics/GraficPizza';
+import BarChartGuia from '../components/home/guia/grafics/BarChartGuia';
+import CardSalario from '../components/home/guia/grafics/CardSalario';
+
+
 const GuiaDeUso = () => {
   return (
     <div>
@@ -19,8 +24,9 @@ const GuiaDeUso = () => {
 
        
               <CardPrincipais />
-            
-        
+              <GraficPizza />
+              <BarChartGuia />
+              <CardSalario />
       
       </section>
 
