@@ -10,7 +10,7 @@ import UserSettings from "./pages/UserSettings";
 import Dashboard from "./pages/Dashboard";
 import TabelaDashboard from "./pages/TabelaDashboard";
 import AuthCallback from "./auth/Callback";
-
+import GuiaDeUso from "./pages/GuiaDeUso";
 // 🔐 Rota protegida
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -36,6 +36,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/Cadastro" element={<Cadastro />} />
+        <Route path="/GuiaDeUso" element={<GuiaDeUso />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/tabela/:id" element={<TabelaDashboard />} />

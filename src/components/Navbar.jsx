@@ -26,14 +26,14 @@ const Navbar = () => {
   const links = user
     ? [
         { name: "Home", path: "/" },
+        { name: "Guia de Uso", path: "/GuiaDeUso" },
         { name: "Minhas Contas", path: "/MinhasContas" },
         { name: "Dashboard", path: "/Dashboard" },
         { name: "Settings", path: "/Settings" },
 
       ]
     : [
-        { name: "Home", path: "/" },
-        
+        { name: "Home", path: "/" },   
         { name: "Login", path: "/login" },
       ];
 
