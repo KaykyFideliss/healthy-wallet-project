@@ -1,121 +1,184 @@
 import React from 'react'
-import {Card, CardHeader, CardFooter, Image, Button} from "@heroui/react"
+import { Card, CardFooter, Image, Button } from "@heroui/react"
+import { IoIosArrowForward } from "react-icons/io"
+import { motion } from "framer-motion"
+
+import Organização from "/img/home/Cards/organização.jpg"
+import Postit from "/img/home/Cards/Post-it.png"
+import Guide from "/img/home/Cards/Guideimgg.png"
+
+/* =====================
+   VARIANTS
+===================== */
+
+const fadeUpBlur = {
+  hidden: {
+    opacity: 0,
+    y: 60,
+    filter: "blur(12px)"
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.8,
+      ease: "easeOut"
+    }
+  },
+  exit: {
+    opacity: 0,
+    y: 60,
+    filter: "blur(12px)",
+    transition: {
+      duration: 0.6,
+      ease: "easeIn"
+    }
+  }
+}
+
+const containerCards = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.2
+    }
+  }
+}
+
+const itemCard = {
+  hidden: {
+    opacity: 0,
+    y: 60,
+    filter: "blur(12px)"
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.7,
+      ease: "easeOut"
+    }
+  },
+  exit: {
+    opacity: 0,
+    y: 60,
+    filter: "blur(12px)",
+    transition: {
+      duration: 0.5,
+      ease: "easeIn"
+    }
+  }
+}
 
 const CardGuiaDeUsoHome = () => {
   return (
-    <section className='items-center justify-center flex w-full h-screen'>
-        
-    <div className="max-w-[1200px] mx-auto gap-4 grid grid-cols-12 px-4 sm:px-6">
-  <Card className="col-span-12 sm:col-span-4 h-[300px] ">
-    <CardHeader className="absolute z-10 top-2 flex-col items-start">
-      <p className="text-tiny text-white/60 uppercase font-bold">
-        What to watch
-      </p>
-      <h4 className="text-orange-500 font-medium text-large">
-        Stream the Acme event
-      </h4>
-    </CardHeader>
-    <Image
-      removeWrapper
-      alt="Card background"
-      className="z-0 w-full h-full object-cover"
-      src="https://heroui.com/images/card-example-4.jpeg"
-    />
-  </Card>
+    <section className="relative w-full min-h-screen flex items-center justify-center py-20 flex-col gap-10 bg-terciaria">
 
-  <Card className="col-span-12 sm:col-span-4 h-[300px]">
-    <CardHeader className="absolute z-10 top-2 flex-col items-start">
-      <p className="text-tiny text-white/60 uppercase font-bold">
-        Plant a tree
-      </p>
-      <h4 className="text-white font-medium text-large">
-        Contribute to the planet
-      </h4>
-    </CardHeader>
-    <Image
-      removeWrapper
-      alt="Card background"
-      className="z-0 w-full h-full object-cover"
-      src="https://heroui.com/images/card-example-3.jpeg"
-    />
-  </Card>
+      {/* =====================
+          TÍTULO
+      ===================== */}
+      <motion.div
+        variants={fadeUpBlur}
+        initial="hidden"
+        whileInView="visible"
+        exit="exit"
+        viewport={{ once: false, amount: 0.3 }}
+        className="flex flex-col items-center gap-3 justify-center"
+      >
+        <div className="flex items-center justify-center h-1 border-primaria border-2 rounded-3xl p-2 w-fit">
+          <div className="pr-3">
+            <p className="bg-secundaria animate-pulse rounded-full w-2 h-2" />
+          </div>
+          <p className="text-[10px] text-white font-zalando uppercase">
+            Entenda cada Função
+          </p>
+        </div>
 
-  <Card className="col-span-12 sm:col-span-4 h-[300px]">
-    <CardHeader className="absolute z-10 top-2 flex-col items-start">
-      <p className="text-tiny text-white/60 uppercase font-bold">
-        Supercharged
-      </p>
-      <h4 className="text-white font-medium text-large">
-        Creates beauty like a beast
-      </h4>
-    </CardHeader>
-    <Image
-      removeWrapper
-      alt="Card background"
-      className="z-0 w-full h-full object-cover"
-      src="https://heroui.com/images/card-example-2.jpeg"
-    />
-  </Card>
+        <h1 className="text-white font-zalando text-3xl sm:text-4xl md:text-5xl font-semibold mb-4 text-center">
+          Domine todas as páginas do{" "}
+          <span className="text-secundaria">Healthy Wallet</span>
+        </h1>
+      </motion.div>
 
-  <Card isFooterBlurred className="col-span-12 sm:col-span-5 h-[300px]">
-    <CardHeader className="absolute z-10 top-2 flex-col items-start">
-      <p className="text-tiny text-white/60 uppercase font-bold">New</p>
-      <h4 className="text-black font-medium text-2xl">
-        Acme camera
-      </h4>
-    </CardHeader>
-    <Image
-      removeWrapper
-      alt="Card example background"
-      className="z-0 w-full h-full scale-125 -translate-y-6 object-cover"
-      src="https://heroui.com/images/card-example-6.jpeg"
-    />
-    <CardFooter className="absolute bottom-0 z-10 bg-white/30 border-t border-white/20 justify-between">
-      <div>
-        <p className="text-black text-tiny">Available soon.</p>
-        <p className="text-black text-tiny">Get notified.</p>
-      </div>
-      <Button size="sm" radius="full" color="primary">
-        Notify Me
-      </Button>
-    </CardFooter>
-  </Card>
+      {/* =====================
+          GRID DE CARDS
+      ===================== */}
+      <motion.div
+        variants={containerCards}
+        initial="hidden"
+        whileInView="visible"
+        exit="hidden"
+        viewport={{ once: false, amount: 0.2 }}
+        className="max-w-[1200px] mx-auto gap-4 grid grid-cols-12 px-4 sm:px-6"
+      >
+        {/* CARD 1 */}
+        <motion.div variants={itemCard} className="col-span-12 sm:col-span-4">
+          <Card className="h-[300px] border border-white/10 rounded-[10px] overflow-hidden shadow-md shadow-black/25 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl">
+            <Image removeWrapper className="w-full h-full object-cover" src={Postit} />
+            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between">
+              <p className="text-white font-zalando text-tiny">Crie sua tabela</p>
+              <Button size="sm" color="primary">
+                <IoIosArrowForward className="h-6 w-6" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </motion.div>
 
-  <Card isFooterBlurred className="col-span-12 sm:col-span-7 h-[300px]">
-    <CardHeader className="absolute z-10 top-2 flex-col items-start">
-      <p className="text-tiny text-white/60 uppercase font-bold">
-        Your day your way
-      </p>
-      <h4 className="text-white/90 font-medium text-xl">
-        Your checklist for better sleep
-      </h4>
-    </CardHeader>
-    <Image
-      removeWrapper
-      alt="Relaxing app background"
-      className="z-0 w-full h-full object-cover"
-      src="https://heroui.com/images/card-example-5.jpeg"
-    />
-    <CardFooter className="absolute bottom-0 z-10 bg-black/40 border-t border-white/10 flex items-center gap-3">
-      <Image
-        alt="Breathing app icon"
-        className="rounded-full w-10 h-10"
-        src="https://heroui.com/images/breathing-app-icon.jpeg"
-      />
-      <div className="flex flex-col text-white text-tiny">
-        <span>Breathing App</span>
-        <span>Get a good night’s sleep.</span>
-      </div>
-      <Button size="sm" radius="full" className="ml-auto">
-        Get App
-      </Button>
-    </CardFooter>
-  </Card>
-</div>
+        {/* CARD 2 */}
+        <motion.div variants={itemCard} className="col-span-12 sm:col-span-4">
+          <Card className="h-[300px] border border-white/10 rounded-[10px] overflow-hidden shadow-md shadow-black/25 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl">
+            <Image removeWrapper className="w-full h-full object-cover" src={Organização} />
+            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-center">
+              <p className="text-white font-zalando text-tiny">
+                Com apenas alguns cliques
+              </p>
+            </CardFooter>
+          </Card>
+        </motion.div>
 
+        {/* CARD 3 */}
+        <motion.div variants={itemCard} className="col-span-12 sm:col-span-4">
+          <Card className="h-[300px] border border-white/10 rounded-[10px] overflow-hidden shadow-md shadow-black/25 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl">
+            <Image
+              removeWrapper
+              className="w-full h-full object-cover"
+              src="https://heroui.com/images/card-example-2.jpeg"
+            />
+            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between">
+              <p className="text-white font-zalando text-tiny">
+                Comece a organizar sua vida
+              </p>
+              <Button size="sm" color="primary">
+                <IoIosArrowForward className="h-6 w-6" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </motion.div>
+
+        {/* =====================
+            ÚLTIMO CARD
+        ===================== */}
+        <motion.div
+          variants={fadeUpBlur}
+          className="col-span-12"
+        >
+          <Card className="h-[400px] border border-white/10 rounded-[10px] overflow-hidden shadow-lg shadow-black/30 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl">
+            <Image removeWrapper className="w-full h-full object-cover" src={Guide} />
+            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between">
+              <p className="text-white font-zalando text-tiny">
+                Acesse a página Guia de Uso para tirar todas as suas dúvidas.
+              </p>
+              <Button size="sm" color="primary">
+                <IoIosArrowForward className="h-6 w-6" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </motion.div>
+      </motion.div>
     </section>
   )
 }
 
 export default CardGuiaDeUsoHome
-
