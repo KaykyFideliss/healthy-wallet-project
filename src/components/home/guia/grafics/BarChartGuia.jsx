@@ -23,7 +23,7 @@ const BarChartGuia = () => {
   ];
 
   return (
-    <section className="h-screen w-full px-5">
+    <section className="w-full px-5">
       <div className="rounded-lg font-zalando col-span-2 ">
         {/* TÍTULO */}
         <h1 className="font-semibold text-primaria text-2xl md:text-4xl lg:text-5xl font-zalando text-center mb-3">

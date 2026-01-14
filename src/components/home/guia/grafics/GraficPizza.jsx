@@ -8,7 +8,7 @@ import {
     Tooltip,
 } from "recharts";
 
-import { HeroGeometric } from '@/components/home/guia/Shade-Landing-Guia';
+import { HeroGeometric } from '../Shade-Landing-GuiaCopy';
 
 /* Dados simulados */
 const pieDataMock = [

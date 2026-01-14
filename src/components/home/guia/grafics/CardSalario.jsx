@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 const CardSalario = () => {
   return (
-    <section className="w-full min-h-screen px-4 py-16 mt-16">
+    <section className=" w-full min-h-screen px-4 py-16 mt-16">
 
       <div className="max-w-6xl mx-auto">
 
