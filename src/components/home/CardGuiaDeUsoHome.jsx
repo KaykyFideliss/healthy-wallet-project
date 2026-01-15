@@ -171,7 +171,7 @@ const CardGuiaDeUsoHome = () => {
             <Image removeWrapper className="w-full h-full object-cover" src={Guide} />
             <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between z-10">
               <p className="text-white font-zalando text-tiny">
-                Acesse a página Guia de Uso para tirar todas as suas dúvidas.
+                Acesse a página Guia de Uso para tirar todas as suas dúvidas
               </p>
               <Button size="sm" color="primary" onClick={() => navigate("/GuiaDeUso")}> 
                 <IoIosArrowForward className="h-6 w-6 text-white" />
