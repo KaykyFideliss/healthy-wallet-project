@@ -7,7 +7,7 @@ import CardGuiaDeUsoHome from '../components/home/CardGuiaDeUsoHome'
 
 const Home = () => {
   return (
-    <div >
+    <div className='overflow-x-hidden' >
         <Hero />
       <Imagesite />
       {/* <Planos /> */}
