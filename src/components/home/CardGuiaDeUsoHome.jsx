@@ -7,6 +7,8 @@ import Organização from "/img/home/Cards/organização.jpg"
 import Postit from "/img/home/Cards/Post-it.png"
 import Guide from "/img/home/Cards/Guideimgg.png"
 
+import { useNavigate } from "react-router-dom";
+
 /* =====================
    VARIANTS
 ===================== */
@@ -72,7 +74,10 @@ const itemCard = {
   }
 }
 
+
+
 const CardGuiaDeUsoHome = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative w-full min-h-screen flex items-center justify-center py-20 flex-col gap-10 bg-terciaria">
 
@@ -102,9 +107,7 @@ const CardGuiaDeUsoHome = () => {
         </h1>
       </motion.div>
 
-      {/* =====================
-          GRID DE CARDS
-      ===================== */}
+      {/*GRID DE CARDS*/}
       <motion.div
         variants={containerCards}
         initial="hidden"
@@ -115,12 +118,12 @@ const CardGuiaDeUsoHome = () => {
       >
         {/* CARD 1 */}
         <motion.div variants={itemCard} className="col-span-12 sm:col-span-4">
-          <Card className="h-[300px] border border-white/10 rounded-[10px] overflow-hidden shadow-md shadow-black/25 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl">
+          <Card className="h-[300px] z-10 border border-white/10 rounded-[10px] overflow-hidden shadow-md shadow-black/25 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl">
             <Image removeWrapper className="w-full h-full object-cover" src={Postit} />
-            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between">
+            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between z-10">
               <p className="text-white font-zalando text-tiny">Crie sua tabela</p>
-              <Button size="sm" color="primary">
-                <IoIosArrowForward className="h-6 w-6" />
+              <Button size="sm" color="primary" onClick={() => navigate("/MinhasContas")}>
+                <IoIosArrowForward className="h-6 w-6 text-white " />
               </Button>
             </CardFooter>
           </Card>
@@ -130,7 +133,7 @@ const CardGuiaDeUsoHome = () => {
         <motion.div variants={itemCard} className="col-span-12 sm:col-span-4">
           <Card className="h-[300px] border border-white/10 rounded-[10px] overflow-hidden shadow-md shadow-black/25 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl">
             <Image removeWrapper className="w-full h-full object-cover" src={Organização} />
-            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-center">
+            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-center z-10">
               <p className="text-white font-zalando text-tiny">
                 Com apenas alguns cliques
               </p>
@@ -146,12 +149,12 @@ const CardGuiaDeUsoHome = () => {
               className="w-full h-full object-cover"
               src="https://heroui.com/images/card-example-2.jpeg"
             />
-            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between">
+            <CardFooter className="absolute bottom-0 left-0 w-full z-10 bg-black/40 justify-between ">
               <p className="text-white font-zalando text-tiny">
                 Comece a organizar sua vida
               </p>
-              <Button size="sm" color="primary">
-                <IoIosArrowForward className="h-6 w-6" />
+              <Button size="sm" color="primary" onClick={() => navigate("/Dashboard")}>
+                <IoIosArrowForward className="h-6 w-6 text-white z-20" />
               </Button>
             </CardFooter>
           </Card>
@@ -164,14 +167,15 @@ const CardGuiaDeUsoHome = () => {
           variants={fadeUpBlur}
           className="col-span-12"
         >
-          <Card className="h-[400px] border border-white/10 rounded-[10px] overflow-hidden shadow-lg shadow-black/30 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl">
+          <Card className="h-[400px] border border-white/10 rounded-[10px] overflow-hidden shadow-lg shadow-black/30 transition-all duration-700 hover:scale-[1.02] hover:shadow-xl ">
             <Image removeWrapper className="w-full h-full object-cover" src={Guide} />
-            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between">
+            <CardFooter className="absolute bottom-0 left-0 w-full bg-black/40 justify-between z-10">
               <p className="text-white font-zalando text-tiny">
                 Acesse a página Guia de Uso para tirar todas as suas dúvidas.
               </p>
-              <Button size="sm" color="primary">
-                <IoIosArrowForward className="h-6 w-6" />
+              <Button size="sm" color="primary" onClick={() => navigate("/GuiaDeUso")}> 
+                <IoIosArrowForward className="h-6 w-6 text-white" />
+                
               </Button>
             </CardFooter>
           </Card>
