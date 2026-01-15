@@ -33,7 +33,7 @@ function App() {
 
       <Routes>
         {/* Páginas públicas */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />}  className="overflow-x-hidden" />
         <Route path="/Login" element={<Login />} />
         <Route path="/Cadastro" element={<Cadastro />} />
         <Route path="/GuiaDeUso" element={<GuiaDeUso />} />
