@@ -4,6 +4,7 @@ import WhyToUse from '../components/home/WhyToUse'
 import Imagesite from '../components/home/Imagesite'
 import Planos from '../components/home/Planos'
 import CardGuiaDeUsoHome from '../components/home/CardGuiaDeUsoHome'  
+import Frase from '../components/home/Frase'
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
       <Imagesite />
       {/* <Planos /> */}
       <CardGuiaDeUsoHome />
+      <Frase />
     </div>  
   )
 }
