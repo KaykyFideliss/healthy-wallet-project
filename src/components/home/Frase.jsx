@@ -3,14 +3,17 @@ import { ThreeDCarousel } from "../home/ThreeDCarousel";
 import BlurEffect from "../home/EffectBlurText/BlurEffect";
 import { motion } from "framer-motion";
 
+
+
 const Frase = () => {
-  const images = [
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&q=80",
-    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&q=80",
-    "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&q=80",
-    "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200&q=80",
-    "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1200&q=80",
-  ];
+
+  // Url das imagens para o carrossel
+const images = [
+  "/img/home/Carrossel/papel.png",
+   "/img/home/Carrossel/feliz.png",
+    "/img/home/Carrossel/duvida.png"
+];
+
 
   return (
     <section className="w-full min-h-screen flex flex-col items-center justify-center gap-16 py-20 px-5 bg-terciaria overflow-hidden">
@@ -29,6 +32,7 @@ const Frase = () => {
       <div className="w-full max-w-6xl">
         <ThreeDCarousel images={images} />
       </div>
+
 
       <div>
       </div>

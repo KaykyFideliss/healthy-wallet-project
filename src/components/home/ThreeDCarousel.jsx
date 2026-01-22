@@ -36,6 +36,7 @@ export function ThreeDCarousel({ images }) {
     }
   };
 
+  
   /* =========================
      POSIÇÕES FIXAS
   ========================== */
@@ -72,7 +73,7 @@ export function ThreeDCarousel({ images }) {
 
       {/* Área do carousel */}
       <motion.div
-        className="relative w-full max-w-6xl h-[320px] sm:h-[420px] flex items-center justify-center"
+        className="relative w-full max-w-6xl h-[320px] sm:h-[420px] flex items-center justify-center "
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.08}
@@ -87,7 +88,7 @@ export function ThreeDCarousel({ images }) {
               key={imageIndex}
               src={images[imageIndex]}
               alt=""
-              className="absolute rounded-2xl shadow-2xl object-cover cursor-grab active:cursor-grabbing border-2 border-terciaria"
+              className="absolute rounded-2xl shadow-2xl object-cover cursor-grab active:cursor-grabbing"
               initial={false}
               animate={{
                 x: pos.x,

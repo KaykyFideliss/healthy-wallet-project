@@ -11,6 +11,9 @@ import Dashboard from "./pages/Dashboard";
 import TabelaDashboard from "./pages/TabelaDashboard";
 import AuthCallback from "./auth/Callback";
 import GuiaDeUso from "./pages/GuiaDeUso";
+
+import Footer from "./components/Footer.jsx";
+
 // 🔐 Rota protegida
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
@@ -29,6 +32,7 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
+      
       <Navbar />
 
       <Routes>
@@ -82,7 +86,13 @@ function App() {
         {/* Redirecionamento para rota padrão */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+
+    
+      <Footer />
+
     </AuthProvider>
+
+    
   );
 }
 
