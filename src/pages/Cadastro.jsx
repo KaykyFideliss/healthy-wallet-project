@@ -3,6 +3,7 @@ import { MdEmail } from "react-icons/md";
 import { FaEye, FaEyeSlash, FaUserAlt, FaPhone } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const Cadastro = () => {
   const navigate = useNavigate();
@@ -117,21 +118,97 @@ const handleSubmit = async (e) => {
 };
 
 
+const imageVariant = {
+  hidden: {
+    opacity: 0,
+    x: -80,
+    filter: "blur(12px)"
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.9,
+      ease: "easeOut"
+    }
+  },
+  exit: {
+    opacity: 0,
+    x: -80,
+    filter: "blur(12px)",
+    transition: {
+      duration: 0.6,
+      ease: "easeIn"
+    }
+  }
+}
+
+const textVariant = {
+  hidden: {
+    opacity: 0,
+    x: 80,
+    filter: "blur(12px)"
+  },
+  visible: {
+    opacity: 1,
+    x: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.9,
+      ease: "easeOut",
+      staggerChildren: 0.15
+    }
+  },
+  exit: {
+    opacity: 0,
+    x: 80,
+    filter: "blur(12px)",
+    transition: {
+      duration: 0.6,
+      ease: "easeIn"
+    }
+  }
+}
+
+const itemFade = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+    filter: "blur(8px)"
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.6,
+      ease: "easeOut"
+    }
+  }
+}
+
+
 
   return (
     <div className="h-screen w-screen overflow-x-hidden flex flex-col md:flex-row items-center justify-center font-zalando">
       
       {/* LADO ESQUERDO */}
-      <div className="hidden md:flex md:w-1/2 ml-14 h-[800px] md:h-[600px] bg-gradient-to-tr rounded-xl bg-azul-style items-center justify-center p-6 relative">
-        <img
-          src="/img/healthy-logo.png"
-          alt="Background"
-          className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-20"
-        />
-      </div>
+        <motion.div className="hidden md:flex md:w-1/2 ml-14 h-[800px] md:h-[800px] bg-gradient-to-tr rounded-xl bg-azul-style items-center justify-center p-6 relative " 
+        variants={imageVariant}
+         initial="hidden"
+          animate="visible"
+        >
+          <img className="rounded-xl" src="./img/home/pessoa-confusa.png" alt="" />
+          <div className="z-10 text-center px-4"></div>
+        </motion.div>
 
       {/* LADO DIREITO */}
-      <div className="flex w-full md:w-1/2 items-center justify-center p-6">
+      <motion.div className="flex w-full md:w-1/2 items-center justify-center p-6"
+        variants={textVariant}
+          initial="hidden"
+          animate="visible"
+          >
         <div className="w-full max-w-sm">
 
           <img className="w-60 h-60 mx-auto -mb-10" src="/img/Healthy-logo.png" alt="Logo" />
@@ -177,7 +254,7 @@ const handleSubmit = async (e) => {
             </div>
           </form>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
