@@ -612,7 +612,7 @@ const listItemVariants = {
             y: -100,
             filter: "blur(10px)"
           }}
-          viewport={{ once: false, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{
             duration: 0.8,
             ease: "easeOut"
@@ -639,7 +639,7 @@ const listItemVariants = {
               y: -100,
               filter: "blur(10px)"
             }}
-            viewport={{ once: false, amount: 0.3 }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{
               duration: 0.8,
               delay: 0.2,
@@ -694,12 +694,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.8,
                 delay: 0.2,
@@ -790,12 +786,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.2,
@@ -817,12 +809,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.2,
@@ -844,12 +832,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.2,
@@ -893,12 +877,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.4,
@@ -930,12 +910,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.4,
@@ -966,12 +942,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.4,
@@ -1010,12 +982,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.8,
@@ -1071,12 +1039,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.4,
@@ -1104,12 +1068,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.4,
@@ -1173,12 +1133,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.4,
@@ -1199,12 +1155,8 @@ const listItemVariants = {
                 y: 0,
                 filter: "blur(0px)"
               }}
-              exit={{
-                opacity: 0,
-                y: -100,
-                filter: "blur(10px)"
-              }}
-              viewport={{ once: false, amount: 0.3 }}
+            
+              viewport={{ once: true, amount: 0.3 }}
               transition={{
                 duration: 0.4,
                 delay: 0.4,
