@@ -179,7 +179,29 @@ const pie = [
       </div>
       <section className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {tabelasWithMetrics.map(t => (
-          <div key={t.id} className="bg-primaria p-4 rounded-xl text-black relative">
+          <motion.div key={t.id} className="bg-primaria p-4 rounded-xl text-black relative"
+           initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+              >
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-zalando font-bold text-lg"  >{t.nome}</h3>
@@ -226,7 +248,7 @@ const pie = [
               <div className=" text-white font-zalando">Data de criação</div>
               <div className=" font-zalando text-white">{new Date(t.criada_em).toLocaleDateString()}</div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </section>
 

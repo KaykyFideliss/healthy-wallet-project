@@ -4,6 +4,7 @@ import { HeroGeometricSettings } from "../components/home/Shade-Landing-Settings
 import { MdEmail } from "react-icons/md";
 import { FaPhoneAlt, FaUser  } from "react-icons/fa";
 import { FaMoneyBillTrendUp } from "react-icons/fa6";
+import Footer from "../components/Footer";
 
 
 export default function UserSettings() {
@@ -96,21 +97,23 @@ if (!userData) {
         </div>
      
   {/* BOTÃO DE SAIR */}
-  <div className="m-2 mx-10">
+  <div className="m-2 mx-auto w-full max-w-md">
         <button
           onClick={async () => {
             await supabase.auth.signOut();
             window.location.href = "/login";
           }}
           className="w-full mt-10 bg-yellow-500 font-zalando text-black font-semibold rounded-xl py-3 
-          hover:bg-yellow-400 transition-all shadow-lg hover:shadow-yellow-400/20"
+          hover:bg-yellow-400 transition-all shadow-lg hover:shadow-yellow-400/20 mb-16"
         >
           Sair da Conta
         </button>
+
+   
 </div>
 
  
-
+ 
     
     </section>
   );
