@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { FaChevronRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const COLORS = ["#04BF8A", "#FFCC28", "#FF6B6B"];
 
@@ -120,8 +121,56 @@ const pie = [
     <div className="p-6">
       <header className="flex m-16 items-center justify-between mb-6">
         <div className="items-center justify-center w-full flex flex-col">
-          <h1 className="text-3xl md:text-5xl text-white font-semibold text-center font-zalando ">DASHBOARD</h1>
-          <p className="text-sm my-1 font-zalando text-primaria/60">Analise e veja seus gastos </p>
+          <motion.h1 className="text-3xl md:text-5xl text-white font-semibold text-center font-zalando "
+                     initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+              >
+                DASHBOARD
+                </motion.h1>
+          <motion.p className="text-sm my-1 font-zalando text-primaria/60"
+                     initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+              >
+                Analise e veja seus gastos
+             </motion.p>
         </div>
       </header>
       <div className="w-full h-scree items-center text-center justify-center">

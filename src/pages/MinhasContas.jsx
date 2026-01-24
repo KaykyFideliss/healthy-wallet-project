@@ -4,8 +4,11 @@ import { supabase } from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { TbCancel } from "react-icons/tb";
+import { motion } from "framer-motion";
 
 export default function MinhasContas() {
+
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -43,6 +46,66 @@ export default function MinhasContas() {
   // seleção de pagamento no histórico (item selecionado)
   const [pagamentoSelecionadoId, setPagamentoSelecionadoId] = useState(null);
 
+  /* =====================
+   VARIANTS
+===================== */
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.2, // tempo entre um card e outro
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: {
+      opacity: 0,
+      y: 100,
+      filter: "blur(10px)",
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: {
+        duration: 0.8,
+        ease: "easeOut",
+      },
+    },
+  };
+
+const listContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const listItemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 60,
+    filter: "blur(6px)",
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
+  },
+};
+
+
+
+
   // Carregar tabelas do Supabase quando user estiver pronto
   useEffect(() => {
     if (!user) return;
@@ -59,37 +122,37 @@ export default function MinhasContas() {
   }, [tabelaAtual]);
 
   // ---------- Helpers ----------
-const formatarDataBR = (iso) => {
-  if (!iso) return "";
-  const d = parseDateAsUTC(iso);
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const year = d.getUTCFullYear();
-  return `${day}/${month}/${year}`;
-};
+  const formatarDataBR = (iso) => {
+    if (!iso) return "";
+    const d = parseDateAsUTC(iso);
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const year = d.getUTCFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
 
   const parseDateAsUTC = (dateStr) => {
-  if (!dateStr) return null;
-  const [y, m, d] = dateStr.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, d));
-};
+    if (!dateStr) return null;
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d));
+  };
 
 
- const isPastDate = (isoDate) => {
-  if (!isoDate) return false;
+  const isPastDate = (isoDate) => {
+    if (!isoDate) return false;
 
-  const venc = parseDateAsUTC(isoDate);
+    const venc = parseDateAsUTC(isoDate);
 
-  const hoje = new Date();
-  const hojeUTC = new Date(Date.UTC(
-    hoje.getFullYear(),
-    hoje.getMonth(),
-    hoje.getDate()
-  ));
+    const hoje = new Date();
+    const hojeUTC = new Date(Date.UTC(
+      hoje.getFullYear(),
+      hoje.getMonth(),
+      hoje.getDate()
+    ));
 
-  return venc < hojeUTC;
-};
+    return venc < hojeUTC;
+  };
 
 
   const calcularParcela = (valor, parcelas) => {
@@ -263,46 +326,46 @@ const formatarDataBR = (iso) => {
     }
   };
 
- const handleDeleteConta = async (contaId) => {
-  if (!window.confirm("Deseja realmente deletar esta conta?")) return;
+  const handleDeleteConta = async (contaId) => {
+    if (!window.confirm("Deseja realmente deletar esta conta?")) return;
 
-  try {
-    // 1. Deletar pagamentos vinculados à conta
-    const { error: erroPagamentos } = await supabase
-      .from("pagamentos")
-      .delete()
-      .eq("conta_id", contaId);
+    try {
+      // 1. Deletar pagamentos vinculados à conta
+      const { error: erroPagamentos } = await supabase
+        .from("pagamentos")
+        .delete()
+        .eq("conta_id", contaId);
 
-    if (erroPagamentos) {
-      console.error("Erro ao deletar pagamentos:", erroPagamentos);
-      alert("Erro ao remover pagamentos da conta.");
-      return;
+      if (erroPagamentos) {
+        console.error("Erro ao deletar pagamentos:", erroPagamentos);
+        alert("Erro ao remover pagamentos da conta.");
+        return;
+      }
+
+      // 2. Deletar a conta
+      const { error: erroConta } = await supabase
+        .from("contas")
+        .delete()
+        .eq("id", contaId);
+
+      if (erroConta) {
+        console.error("Erro ao deletar conta:", erroConta);
+        alert("Erro ao remover a conta.");
+        return;
+      }
+
+      // 3. Remover do estado local
+      setContas((prev) => prev.filter((c) => c.id !== contaId));
+
+      // 4. Atualizar tabelas e pagamentos (importante para o Dashboard)
+      await loadTabelas();
+      await loadPagamentos();
+
+    } catch (err) {
+      console.error("Erro deletar conta:", err);
+      alert("Erro inesperado ao deletar conta.");
     }
-
-    // 2. Deletar a conta
-    const { error: erroConta } = await supabase
-      .from("contas")
-      .delete()
-      .eq("id", contaId);
-
-    if (erroConta) {
-      console.error("Erro ao deletar conta:", erroConta);
-      alert("Erro ao remover a conta.");
-      return;
-    }
-
-    // 3. Remover do estado local
-    setContas((prev) => prev.filter((c) => c.id !== contaId));
-
-    // 4. Atualizar tabelas e pagamentos (importante para o Dashboard)
-    await loadTabelas();
-    await loadPagamentos();
-
-  } catch (err) {
-    console.error("Erro deletar conta:", err);
-    alert("Erro inesperado ao deletar conta.");
-  }
-};
+  };
 
 
   // marcar linha para deletar (agora também seleciona para ações)
@@ -323,43 +386,43 @@ const formatarDataBR = (iso) => {
     setContaParaDeletar(null);
   };
 
-const getStatus = (conta) => {
-  if (!conta) return "ok";
-  if (conta.status === "pago") return "pago";
-  if (!conta.vencimento) return "ok";
+  const getStatus = (conta) => {
+    if (!conta) return "ok";
+    if (conta.status === "pago") return "pago";
+    if (!conta.vencimento) return "ok";
 
-  const venc = parseDateAsUTC(conta.vencimento);
+    const venc = parseDateAsUTC(conta.vencimento);
 
-  const hoje = new Date();
-  const hojeUTC = new Date(Date.UTC(
-    hoje.getFullYear(),
-    hoje.getMonth(),
-    hoje.getDate()
-  ));
+    const hoje = new Date();
+    const hojeUTC = new Date(Date.UTC(
+      hoje.getFullYear(),
+      hoje.getMonth(),
+      hoje.getDate()
+    ));
 
-  const diffDays = Math.floor((venc - hojeUTC) / 86400000);
+    const diffDays = Math.floor((venc - hojeUTC) / 86400000);
 
-  if (diffDays < 0) return "vencida";
-  if (diffDays <= 3) return "quase";
-  return "ok";
-};
+    if (diffDays < 0) return "vencida";
+    if (diffDays <= 3) return "quase";
+    return "ok";
+  };
 
 
-const contasFiltradas = contas
-  .filter((c) => {
-    if (filtro === "all") return true;
-    if (filtro === "pagas") return c.status === "pago";
-    const status = getStatus(c);
-    if (filtro === "vencidas") return status === "vencida";
-    if (filtro === "quase") return status === "quase";
-    if (filtro === "ok") return status === "ok";
-    return true;
-  })
-  .sort((a, b) => {
-    const da = parseDateAsUTC(a.vencimento);
-    const db = parseDateAsUTC(b.vencimento);
-    return da - db;
-  });
+  const contasFiltradas = contas
+    .filter((c) => {
+      if (filtro === "all") return true;
+      if (filtro === "pagas") return c.status === "pago";
+      const status = getStatus(c);
+      if (filtro === "vencidas") return status === "vencida";
+      if (filtro === "quase") return status === "quase";
+      if (filtro === "ok") return status === "ok";
+      return true;
+    })
+    .sort((a, b) => {
+      const da = parseDateAsUTC(a.vencimento);
+      const db = parseDateAsUTC(b.vencimento);
+      return da - db;
+    });
 
 
   // abrir modal de pagamento (escolher quantas parcelas)
@@ -525,21 +588,71 @@ const contasFiltradas = contas
     abrirModalPagamento(conta);
   };
 
+
   // render
   if (!showTable) {
     return (
-      <div className="text-white flex flex-col items-center justify-center p-6 mt-20">
-        <h1 className="text-3xl md:text-5xl font-semibold text-center font-zalando mb-8">MINHAS TABELAS</h1>
+      <motion.div className="text-white flex flex-col items-center justify-center p-6 mt-20"
+
+
+      >
+        <motion.h1 className="text-3xl md:text-5xl font-semibold text-center font-zalando mb-8"
+          initial={{
+            opacity: 0,
+            y: 100,
+            filter: "blur(10px)"
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)"
+          }}
+          exit={{
+            opacity: 0,
+            y: -100,
+            filter: "blur(10px)"
+          }}
+          viewport={{ once: false, amount: 0.3 }}
+          transition={{
+            duration: 0.8,
+            ease: "easeOut"
+          }}
+
+        >
+          MINHAS TABELAS
+        </motion.h1>
 
         {!criandoNovaTabela ? (
-          <div className="flex items-center justify-center">
+          <motion.div className="flex items-center justify-center"
+            initial={{
+              opacity: 0,
+              y: 100,
+              filter: "blur(10px)"
+            }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)"
+            }}
+            exit={{
+              opacity: 0,
+              y: -100,
+              filter: "blur(10px)"
+            }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{
+              duration: 0.8,
+              delay: 0.2,
+              ease: "easeOut"
+            }}
+          >
             <button
               onClick={() => setCriandoNovaTabela(true)}
               className="bg-primaria font-zalando text-black font-semibold py-3 px-6 rounded-xl hover:bg-yellow-300 transition text-lg"
             >
               CRIAR TABELA
             </button>
-          </div>
+          </motion.div>
         ) : (
           <div className="flex flex-col items-center gap-4">
             <input
@@ -570,12 +683,45 @@ const contasFiltradas = contas
 
         {tabelas.length > 0 && (
           <div className="mt-16 w-full max-w-2xl md:max-w-5xl">
-            <h2 className="text-4xl md:text-5xl font-semibold font-zalando text-center mb-16">Suas Tabelas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <motion.h2 className="text-4xl md:text-5xl font-semibold font-zalando text-center mb-16"
+              initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.8,
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+            >
+              Suas Tabelas
+            </motion.h2>
+
+            <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-4"
+             variants={containerVariants}
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true, amount: 0.2 }}
+   delay={0.5}
+  >
               {tabelas.map((tabela) => (
-                <div
+                <motion.div
                   key={tabela.id}
+                  variants={cardVariants}
                   onClick={() => selecionarTabela(tabela)}
+                 
                   className="bg-primaria text-terciaria p-4 rounded-xl cursor-pointer hover:bg-yellow-300 transition transform hover:scale-105"
                 >
                   <div className="flex justify-between items-center">
@@ -587,47 +733,129 @@ const contasFiltradas = contas
                       <FaTrash size={14} />
                     </button>
                   </div>
+
                   <p className="text-sm text-secundaria font-zalando mt-2">
                     Clique para abrir
                   </p>
-                </div>
+                </motion.div>
               ))}
-
-
- 
-
-            </div>
+            </motion.div>
           </div>
-          
+
         )}
-      </div>
-      
+      </motion.div>
+
     );
-    
+
   }
 
   // TELA DA TABELA (detalhes)
   return (
     <div className="min-h-screen text-white flex flex-col items-center">
       <div className="w-full max-w-5xl lg:max-w-7xl p-3 mt-10">
-        <button
+        <motion.button
+                  initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}  
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+
           onClick={voltarParaLista}
           className="bg-secundaria text-white font-zalando py-2 px-4 rounded-xl hover:bg-green-700 transition mb-4 flex items-center gap-2"
         >
           <FaArrowLeft />
           Voltar
-        </button>
+        </motion.button>
 
         <div className="flex justify-center items-center pt-10">
-          <h1 className="font-zalando text-base">TABELA</h1>
+          <motion.h1 className="font-zalando text-base"
+                initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+              >TABELA
+              </motion.h1>
         </div>
 
         {tabelaAtual && (
-          <h2 className="text-2xl font-zalando text-center mb-6 text-primaria">{tabelaAtual.nome}</h2>
+          <motion.h2 
+                initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+              delay={0.5}
+              className="text-2xl font-zalando text-center mb-6 text-primaria">{tabelaAtual.nome}</motion.h2>
         )}
 
         {/* filtros e ações */}
-        <div className="flex flex-col md:flex-row items-center gap-3 mb-4 ">
+        <motion.div className="flex flex-col md:flex-row items-center gap-3 mb-4 "
+              initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.2,
+                ease: "easeOut"
+              }}
+        >
           <div className="flex gap-2 items-center relative">
             <label className="font-zalando mr-4">Filtrar:</label>
 
@@ -650,57 +878,150 @@ const contasFiltradas = contas
               <FaChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-primaria pointer-events-none" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Cabeçalho */}
-        <div className="bg-primaria font-zalando mx-1 text-black font-semibold rounded-xl 
-  flex justify-between items-center px-3 py-3 gap-4">
+        <motion.div className="bg-primaria font-zalando mx-1 text-black font-semibold rounded-xl 
+  flex justify-between items-center px-3 py-3 gap-4"
+        initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.4,
+                ease: "easeOut"
+              }}
+              >
           <span className="w-32 text-[11px] md:text-lg lg:text-2xl">NOME</span>
           <span className="w-32 text-[11px] md:text-lg lg:text-2xl">VENCIMENTO</span>
           <span className="w-24 text-[11px] md:text-lg lg:text-2xl  ">PARCELAS</span>
           <span className="w-32 text-[11px] md:text-lg lg:text-2xl text-center">VALOR</span>
-        </div>
+        </motion.div>
+
 
         {/* Linhas da tabela */}
         {contasFiltradas.map((conta) => {
           const valorParcela = calcularParcela(conta.valor, conta.parcelas);
 
           return (
-            <div
-              key={conta.id}
-              onClick={() => handleClickLinha(conta)}
-              className={`font-zalando flex items-center justify-between px-3 py-3 mt-2 
-  rounded-xl mx-1 transition-all ${
-    conta.status === "pago"
+        <motion.div
+  key={conta.id}
+ 
+   initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.4,
+                ease: "easeOut"
+              }}
+
+  onClick={() => handleClickLinha(conta)}
+  className={`font-zalando flex items-center justify-between px-3 py-3 mt-2 
+    rounded-xl mx-1 transition-all
+    ${conta.status === "pago"
       ? "bg-green-600 text-white"
       : getStatus(conta) === "vencida"
-      ? "bg-red-600 text-white"
-      : getStatus(conta) === "quase"
-      ? "bg-yellow-300 text-black"
-      : "bg-primaria text-black"
-  } ${contaParaDeletar === conta.id ? "ring-4 ring-yellow-400" : ""}`}
-            >
-              <span className="w-32 text-xs md:text-lg lg:text-xl">{conta.nome}</span>
+        ? "bg-red-600 text-white"
+        : getStatus(conta) === "quase"
+          ? "bg-yellow-300 text-black"
+          : "bg-primaria text-black"
+    }
+    ${contaParaDeletar === conta.id ? "ring-4 ring-yellow-400" : ""}`}
+>
+  <span
+   initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.4,
+                ease: "easeOut"
+              }}
+               className="w-32 text-xs md:text-lg lg:text-xl">{conta.nome}</span>
 
-              <span className="w-32 text-xs md:text-lg lg:text-xl">
-                {formatarDataBR(conta.vencimento)}
-              </span>
+  <span className="w-32 text-xs md:text-lg lg:text-xl">
+    {formatarDataBR(conta.vencimento)}
+  </span>
 
-              <span className="w-24 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
-                {conta.parcelas ? `${conta.parcelas}x` : "-"}
-              </span>
+  <span className="w-24 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
+    {conta.parcelas ? `${conta.parcelas}x` : "-"}
+  </span>
 
-              <span className="w-44 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
-                {conta.parcelas && calcularParcela(conta.valor, conta.parcelas)
-                  ? `${formatMoney(calcularParcela(conta.valor, conta.parcelas))} x ${conta.parcelas}`
-                  : formatMoney(conta.valor)}
-              </span>
-            </div>
+  <span className="w-44 text-xs md:text-lg lg:text-xl text-center flex justify-center items-center">
+    {conta.parcelas && calcularParcela(conta.valor, conta.parcelas)
+      ? `${formatMoney(calcularParcela(conta.valor, conta.parcelas))} x ${conta.parcelas}`
+      : formatMoney(conta.valor)}
+  </span>
+</motion.div>
+
+
           );
         })}
 
         {/* Inputs para adicionar nova conta */}
-        <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row gap-3 mt-6">
+        <motion.div className="flex flex-col space-y-3 md:space-y-0 md:flex-row gap-3 mt-6"
+        initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.8,
+                ease: "easeOut"
+              }}
+        >
           <input
             type="text"
             placeholder="Nome da conta"
@@ -735,11 +1056,33 @@ const contasFiltradas = contas
             className="p-2 rounded-xl font-zalando text-black w-full md:w-1/4"
             step="0.01"
           />
-        </div>
+        </motion.div>
 
         <div className="flex flex-col md:flex-row gap-3 mt-5">
           {/* Adicionar */}
-          <button
+          <motion.button
+           initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.4,
+                ease: "easeOut"
+              }}
+              
             onClick={handleAddConta}
             disabled={modoDeletar}
             className={`${modoDeletar ? "bg-gray-400" : "bg-primaria hover:bg-yellow-300"} 
@@ -747,17 +1090,37 @@ const contasFiltradas = contas
           >
             <FaPlus className="mr-2" />
             Adicionar
-          </button>
-
+          </motion.button>
           {/* Deletar linha */}
           {!modoDeletar ? (
-            <button
+            <motion.button
+              initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.4,
+                ease: "easeOut"
+              }}
               onClick={ativarModoDeletar}
               className="bg-vermelho text-white font-zalando p-3 rounded-xl flex items-center justify-center hover:bg-red-500 transition flex-1"
             >
               <FaTrash className="mr-2" />
               Deletar Linha
-            </button>
+            </motion.button>
           ) : (
             <div className="flex gap-3 flex-1">
               <button
@@ -785,11 +1148,10 @@ const contasFiltradas = contas
           {contaParaDeletar && !modoDeletar && (
             <button
               onClick={handleAbrirPagamentoSelecionada}
-              className={`${
-                (contas.find(c => c.id === contaParaDeletar) || {}).status === "pago"
+              className={`${(contas.find(c => c.id === contaParaDeletar) || {}).status === "pago"
                   ? "bg-red-700 hover:bg-red-800"
                   : "bg-green-600 hover:bg-green-700"
-              } 
+                } 
       text-white font-zalando p-3 rounded-xl flex items-center justify-center transition flex-1`}
             >
               {(contas.find(c => c.id === contaParaDeletar) || {}).status === "pago"
@@ -800,9 +1162,55 @@ const contasFiltradas = contas
         </div>
 
         {/* Histórico de pagamentos (Contas Pagas) */}
-        <h2 className="mt-10 text-xl font-zalando text-center">Histórico de Pagamentos</h2>
+        <motion.h2 className="mt-10 text-xl font-zalando text-center"
+         initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.4,
+                ease: "easeOut"
+              }}
+              >
+                Histórico de Pagamentos
+                </motion.h2>
 
-        <div className="bg-black bg-opacity-10 p-4 rounded-xl mt-4">
+        <motion.div className="bg-black bg-opacity-10 p-4 rounded-xl mt-4"
+         initial={{
+                opacity: 0,
+                y: 100,
+                filter: "blur(10px)"
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)"
+              }}
+              exit={{
+                opacity: 0,
+                y: -100,
+                filter: "blur(10px)"
+              }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.4,
+                ease: "easeOut"
+              }}
+              >
           {pagamentos.length === 0 ? (
             <p className="text-center text-gray-300 font-zalando">Nenhum pagamento registrado ainda</p>
           ) : (
@@ -846,28 +1254,27 @@ const contasFiltradas = contas
               );
             })
           )}
-        </div>
+        </motion.div>
 
         {/* BOTÃO '↩ Cancelar Pagamento' - embaixo do histórico */}
-      
+
         <div className="mt-4 flex justify-center  ">
           <button
             onClick={abrirModalCancelarSelecionado}
             disabled={!pagamentoSelecionadoId}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-zalando ${
-              pagamentoSelecionadoId ? "bg-red-700 hover:bg-red-800 text-white" : "bg-gray-500 text-white cursor-not-allowed"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-zalando ${pagamentoSelecionadoId ? "bg-red-700 hover:bg-red-800 text-white" : "bg-gray-500 text-white cursor-not-allowed"
+              }`}
           >
             <span >
               <TbCancel />
             </span>
             Cancelar Pagamento
           </button>
-           
+
         </div>
-          <div className=" items-center flex justify-center">
-         <p className="font-zalando text-xs mt-2 text-white/40">Para cancelar selecione a conta</p>
-         </div>
+        <div className=" items-center flex justify-center">
+          <p className="font-zalando text-xs mt-2 text-white/40">Para cancelar selecione a conta</p>
+        </div>
 
 
         <div className="mt-6 flex gap-4 items-center justify-center font-zalando text-sm">
@@ -885,7 +1292,7 @@ const contasFiltradas = contas
           </div>
         </div>
 
-        
+
 
         {/* Mensagem modo deletar */}
         {modoDeletar && (
@@ -978,7 +1385,7 @@ const contasFiltradas = contas
                 >
                   Fechar
                 </button>
-              
+
               </div>
             </div>
           </div>

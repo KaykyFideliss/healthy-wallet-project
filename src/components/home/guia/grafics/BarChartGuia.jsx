@@ -1,4 +1,5 @@
-import React from 'react'
+import React from "react";
+import { motion } from "framer-motion";
 import {
   BarChart,
   Bar,
@@ -7,6 +8,36 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+
+/* ================= ANIMAÇÃO ================= */
+
+const easeSmooth = [0.22, 1, 0.36, 1];
+
+const blurUpVariant = {
+  hidden: {
+    opacity: 0,
+    y: 80,
+    filter: "blur(14px)",
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 1,
+      ease: easeSmooth,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: 60,
+    filter: "blur(10px)",
+    transition: {
+      duration: 0.6,
+      ease: "easeIn",
+    },
+  },
+};
 
 const BarChartGuia = () => {
   const barDataMock = [
@@ -23,43 +54,72 @@ const BarChartGuia = () => {
   ];
 
   return (
-    <section className="w-full px-5">
-      <div className="rounded-lg font-zalando col-span-2 ">
-        {/* TÍTULO */}
-        <h1 className="font-semibold text-primaria text-2xl md:text-4xl lg:text-5xl font-zalando text-center mb-3">
+    <motion.section
+      className="w-full px-5"
+      variants={blurUpVariant}
+      initial="hidden"
+      whileInView="visible"
+      exit="exit"
+      viewport={{ once: false, amount: 0.2 }}
+    >
+      <div className="rounded-lg font-zalando col-span-2">
+        <motion.h1 className="font-semibold text-primaria text-2xl md:text-4xl lg:text-5xl text-center mb-3"
+         variants={blurUpVariant}
+      initial="hidden"
+      whileInView="visible"
+      exit="exit"
+      viewport={{ once: false, amount: 0.2 }}
+      >
           GRÁFICO EM BARRA
-        </h1>
+        </motion.h1>
 
-        <p className="text-white font-zalando text-center text-[11px] md:text-sm mb-14">
+        <motion.p className="text-white text-center text-[11px] md:text-sm mb-14"
+         variants={blurUpVariant}
+      initial="hidden"
+      whileInView="visible"
+      exit="exit"
+      viewport={{ once: false, amount: 0.2 }}
+      >
           O gráfico de pizza apresenta uma visão visual da situação das suas contas,
           separada por status.
-        </p>
-
-      </div>
-      <div className='md:mx-40'>
-        <p className="text-white font-zalando text-justify text-base md:text-lg lg:text-xl mb-14">
-          Este gráfico apresenta as 10 despesas mais altas registradas, organizadas do maior para o menor valor, permitindo visualizar rapidamente quais contas consomem a maior parte do orçamento mensal. Com ele, o usuário consegue identificar de forma imediata quais gastos têm maior impacto financeiro, apoiar decisões importantes e ter mais clareza e consciência no controle das finanças. É uma ferramenta ideal para quem busca uma visão rápida, objetiva e estratégica das despesas, facilitando a organização e o planejamento financeiro.
-
-          </p>
-
-
-         
+        </motion.p>
       </div>
 
-      <div className="w-full h-[390px] lg:h-[520px] md:">
+      <div className="md:mx-40">
+        <motion.p className="text-white font-zalando text-justify text-base md:text-lg lg:text-xl mb-14"
+         variants={blurUpVariant}
+      initial="hidden"
+      whileInView="visible"
+      exit="exit"
+      viewport={{ once: false, amount: 0.2 }}
+      >
+          Este gráfico apresenta as 10 despesas mais altas registradas, organizadas
+          do maior para o menor valor, permitindo visualizar rapidamente quais
+          contas consomem a maior parte do orçamento mensal. Com ele, o usuário
+          consegue identificar de forma imediata quais gastos têm maior impacto
+          financeiro, apoiar decisões importantes e ter mais clareza e consciência
+          no controle das finanças.
+        </motion.p>
+      </div>
+
+      <motion.div className="w-full h-[390px] lg:h-[520px]"
+       variants={blurUpVariant}
+      initial="hidden"
+      whileInView="visible"
+      exit="exit"
+      viewport={{ once: false, amount: 0.2 }}
+      >
         <ResponsiveContainer>
           <BarChart
             data={barDataMock}
             layout="vertical"
             margin={{ top: 10, right: 30, left: -50, bottom: 10 }}
-            className='font-zalando  '
           >
             <YAxis
               type="category"
               dataKey="name"
               width={100}
               tick={{ fill: "#fff", fontSize: 8 }}
-             
               tickLine={false}
               axisLine={{ stroke: "#FFFFFF", strokeWidth: 2 }}
             />
@@ -67,16 +127,14 @@ const BarChartGuia = () => {
             <XAxis
               type="number"
               tick={{ fill: "#fff", fontSize: 8 }}
-              
               tickLine={false}
-               axisLine={{ stroke: "#FFFFFF", strokeWidth: 2 }}
+              axisLine={{ stroke: "#FFFFFF", strokeWidth: 2 }}
               tickFormatter={(v) =>
                 new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                   notation: "compact",
                 }).format(v)
-                
               }
             />
 
@@ -93,15 +151,11 @@ const BarChartGuia = () => {
               }}
             />
 
-            <Bar
-              dataKey="value"
-              radius={[0, 8, 8, 0]}
-              fill="#ffcc00"
-            />
+            <Bar dataKey="value" radius={[0, 8, 8, 0]} fill="#ffcc00" />
           </BarChart>
         </ResponsiveContainer>
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 };
 

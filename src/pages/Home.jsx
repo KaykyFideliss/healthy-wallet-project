@@ -5,7 +5,7 @@ import Imagesite from '../components/home/Imagesite'
 import Planos from '../components/home/Planos'
 import CardGuiaDeUsoHome from '../components/home/CardGuiaDeUsoHome'  
 import Frase from '../components/home/Frase'
-
+import Footer from '../components/Footer'
 const Home = () => {
   return (
     <div className='overflow-x-hidden' >
@@ -14,6 +14,8 @@ const Home = () => {
       {/* <Planos /> */}
       <CardGuiaDeUsoHome />
       <Frase />
+          <Footer  />
+
     </div>  
   )
 }
